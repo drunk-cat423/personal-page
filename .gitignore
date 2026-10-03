@@ -1,0 +1,44 @@
+# Local experiments and visual QA history (kept on disk)
+/outputs/
+/research/
+/designs/
+/floral-blog/
+/v2/
+/v3/
+/v4/
+/app.js
+/styles.css
+/DESIGN.md
+/component-preview.jpg
+
+# Earlier illustration experiments
+/assets/floral-seal.svg
+/assets/foreground.png
+/assets/scene.png
+/assets/illustrations/cel/
+/assets/illustrations/meadow-original.png
+/assets/illustrations/meadow-wind.webp
+/assets/illustrations/coast-wind.webp
+/assets/illustrations/motion-verification.json
+/assets/illustrations/README.md
+/assets/illustrations/cel-six/*-aligned-*.png
+/assets/illustrations/cel-six/*-pose-grid.png
+/assets/illustrations/cel-six/*-trunk-*.png
+/assets/illustrations/cel-six/six-verification.json
+/scripts/build-cel-wind.mjs
+/scripts/build-wind-loops.mjs
+
+# Optional build tools, caches and credentials
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+*.log
+*.tmp.webp
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.DS_Store
+Thumbs.db

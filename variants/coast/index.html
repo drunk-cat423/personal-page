@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fdfefe">
+  <meta name="description" content="晴屿，给日常留一片晴空。记录小事、想法与正在做的作品。">
+  <title>晴屿 A QUIET PLACE · 方案 03</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="paper-grid" aria-hidden="true"></div>
+  <div class="site-shell">
+    <header class="site-header" id="top">
+      <a class="brand" href="#top" aria-label="晴屿首页"><span class="brand-mark" aria-hidden="true">晴</span><span><strong>晴屿</strong><small>A QUIET PLACE</small></span></a>
+      <nav class="main-nav" aria-label="主要导航"><a href="#notes" class="is-current" aria-current="location">记录</a><a href="#makings">作品</a><a href="#about">关于</a></nav>
+      <div class="scheme-links"><a class="scheme-link" href="../../index.html"><span class="scheme-full">当前主页</span><span class="scheme-short">主页</span><span aria-hidden="true">↗</span></a></div>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="welcome-title">
+        <div class="hero-copy"><p class="eyebrow">NOTES, MAKINGS &amp; EVERYDAY WONDERS</p><h1 id="welcome-title">给日常，留一片<span class="title-mark">晴空</span>。</h1><p class="welcome-copy">记一些想法，也留住生活里轻轻发光的瞬间。</p><span class="hero-aside">你好，今天也慢慢来。<svg aria-hidden="true"><use href="assets/journal-symbols.svg#line-star"/></svg></span></div>
+        <div class="hero-art" aria-label="淡蓝色钢笔线描海岸插画"><img src="../../assets/illustrations/coast-static.png" alt="海岸边的小屋、海浪与远山，淡蓝色钢笔和水彩手绘"></div>
+        <nav class="quick-links" aria-label="快速浏览">
+          <a href="#notes" data-filter="all"><svg class="quick-icon" aria-hidden="true"><use href="assets/journal-symbols.svg#i-note"/></svg><span><strong>随手写写</strong><small>NOTES &amp; IDEAS</small></span><svg class="quick-arrow" aria-hidden="true"><use href="assets/journal-symbols.svg#i-arrow"/></svg></a>
+          <a href="#makings"><svg class="quick-icon" aria-hidden="true"><use href="assets/journal-symbols.svg#i-window"/></svg><span><strong>我的作品</strong><small>SMALL MAKINGS</small></span><svg class="quick-arrow" aria-hidden="true"><use href="assets/journal-symbols.svg#i-arrow"/></svg></a>
+          <a href="#notes" data-filter="life"><svg class="quick-icon" aria-hidden="true"><use href="assets/journal-symbols.svg#i-life"/></svg><span><strong>生活碎片</strong><small>EVERYDAY LIFE</small></span><svg class="quick-arrow" aria-hidden="true"><use href="assets/journal-symbols.svg#i-arrow"/></svg></a>
+        </nav>
+      </section>
+      <section class="section-block notes-section" id="notes" aria-labelledby="notes-title">
+        <div class="section-head"><div><p class="eyebrow">RECENTLY ON MY MIND</p><h2 id="notes-title">最近，记下了这些</h2></div><div class="filter-wrap"><div class="filter-tabs" role="tablist" aria-label="筛选文章"><button class="filter-tab is-active" type="button" role="tab" id="filter-all" aria-selected="true" aria-controls="note-list" tabindex="0" data-filter="all">所有</button><button class="filter-tab" type="button" role="tab" id="filter-idea" aria-selected="false" aria-controls="note-list" tabindex="-1" data-filter="idea">想法</button><button class="filter-tab" type="button" role="tab" id="filter-life" aria-selected="false" aria-controls="note-list" tabindex="-1" data-filter="life">生活</button><button class="filter-tab" type="button" role="tab" id="filter-making" aria-selected="false" aria-controls="note-list" tabindex="-1" data-filter="making">折腾</button></div><span class="saved-total" aria-live="polite">已收藏 <b id="saved-total">0</b></span></div></div>
+        <div class="note-list" id="note-list" role="tabpanel" aria-labelledby="filter-all" tabindex="0" aria-live="polite"></div>
+      </section>
+      <section class="section-block makings-section" id="makings" aria-labelledby="makings-title">
+        <div class="section-head project-head"><div><p class="eyebrow">THINGS TAKING SHAPE</p><h2 id="makings-title">正在做的小东西</h2></div><p class="section-note">有些想法，正在慢慢长出形状。</p></div>
+        <div class="project-list">
+          <article class="project-item"><svg class="project-illustration" aria-hidden="true"><use href="assets/journal-symbols.svg#i-window"/></svg><div class="project-copy"><p class="project-kicker">A SMALL WEB EXPERIMENT</p><h3>一扇可以慢慢打开的窗</h3><p>一个关于收藏日常片刻的小页面，把文字、天气和一点点留白放在一起。</p><button class="project-open" type="button" data-project="0">看看这个想法 <svg aria-hidden="true"><use href="assets/journal-symbols.svg#i-arrow"/></svg></button></div><span class="project-index" aria-hidden="true">01</span></article>
+          <article class="project-item"><svg class="project-illustration sprout-art" aria-hidden="true"><use href="assets/journal-symbols.svg#i-sprout"/></svg><div class="project-copy"><p class="project-kicker">A NOTE-KEEPING TOOL</p><h3>给未完成的想法留个位置</h3><p>一个很轻的灵感收纳练习，让还没想清楚的事情也有地方停靠。</p><button class="project-open" type="button" data-project="1">看看这个想法 <svg aria-hidden="true"><use href="assets/journal-symbols.svg#i-arrow"/></svg></button></div><span class="project-index" aria-hidden="true">02</span></article>
+        </div>
+      </section>
+      <section class="section-block about-section" id="about" aria-labelledby="about-title"><svg class="about-doodle" aria-hidden="true"><use href="assets/journal-symbols.svg#i-sprout"/></svg><div class="about-note"><p class="eyebrow">A LITTLE HELLO</p><h2 id="about-title">你好，欢迎来坐坐。</h2><p>这里先放一段示例介绍。以后可以写你的名字、正在做的事，和喜欢的日常。</p><a href="#top">回到晴空 <span aria-hidden="true">↑</span></a></div><span class="about-caption">leave a little room for wonder</span></section>
+    </main>
+    <footer class="site-footer"><a class="footer-brand" href="#top">晴屿 <span>·</span> A QUIET PLACE</a><p>内容为设计示例 · 方案 03</p><a href="../../index.html">回到当前主页 <span aria-hidden="true">↗</span></a></footer>
+  </div>
+  <dialog class="reader-dialog" id="reader-dialog" aria-labelledby="reader-title"><article class="reader-paper"><button class="reader-close" id="reader-close" type="button" aria-label="关闭阅读窗口"><svg aria-hidden="true"><use href="assets/journal-symbols.svg#i-close"/></svg></button><p class="eyebrow" id="reader-kicker">A QUIET NOTE</p><h2 id="reader-title">文章标题</h2><div class="reader-meta" id="reader-meta"></div><div class="reader-rule" aria-hidden="true"></div><div class="reader-content" id="reader-content"></div><p class="reader-endmark" aria-hidden="true">— 晴屿 —</p></article></dialog>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1">
+  <symbol id="i-note" viewBox="0 0 64 64"><path d="M16 10h24l10 10v34H16zM40 10v11h10M23 31h20M23 39h18M23 47h12" fill="#e9f2fb" stroke="#537dab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 13h18v6c-5 1-11 2-18 3z" fill="#d6e6f6"/></symbol>
+  <symbol id="i-window" viewBox="0 0 64 64"><path d="M11 52V14h42v38M8 53h48M32 15v36M12 33h39M17 52V39h10v13M39 52V39h10v13" fill="#e9f2fb" stroke="#537dab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 18h13v12H15zm21 0h13v12H36z" fill="#d6e6f6"/></symbol>
+  <symbol id="i-life" viewBox="0 0 64 64"><path d="M32 53S13 42 13 27c0-8 6-13 13-11 4 1 6 5 6 5s3-5 8-5c7 0 12 5 12 12 0 14-20 25-20 25Z" fill="#e9f2fb" stroke="#537dab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 47S18 39 18 28c0-5 4-8 8-6 3 1 6 5 6 5s4-5 8-5c4 0 7 3 7 7 0 10-15 18-15 18Z" fill="#d6e6f6"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 4.5h12v16l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-sprout" viewBox="0 0 72 72"><path d="M36 62V31m0 16c-1-12-9-19-23-20 0 13 7 21 23 22m0-7c2-13 10-20 24-20-1 13-8 20-24 21" fill="#e9f2fb" stroke="#537dab" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M34 43c-5-7-11-10-17-11 2 8 7 12 17 13zm4-4c4-7 10-10 17-11-2 8-7 12-17 13z" fill="#d6e6f6"/></symbol>
+  <symbol id="line-star" viewBox="0 0 48 48"><path d="M24 5c1 12 7 18 19 19-12 1-18 7-19 19-1-12-7-18-19-19C17 23 23 17 24 5Z" fill="#e9f2fb" stroke="#537dab" stroke-width="1.7" stroke-linejoin="round"/></symbol>
+</svg>
