@@ -1,5 +1,9 @@
 import { articles, works, messages } from './content.js';
 
+if (document.readyState === 'loading') {
+  await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }));
+}
+
 const $ = (selector, root = document) => root.querySelector(selector);
 const page = document.body.dataset.page;
 
@@ -18,7 +22,7 @@ function makeArticleRow(article) {
   meta.append(date);
   const titleWrap = element('div', 'article-title');
   const titleLink = element('a');
-  titleLink.href = `article.html?id=${encodeURIComponent(article.id)}`;
+  titleLink.href = `posts/${encodeURIComponent(article.id)}.html`;
   titleLink.append(element('h3', '', article.title));
   titleWrap.append(titleLink);
   const copy = element('p', 'article-excerpt', article.excerpt);
@@ -61,9 +65,7 @@ function makeWorkRow(work) {
   titleLink.href = `work.html?id=${encodeURIComponent(work.id)}`;
   title.append(titleLink);
   const excerpt = element('p', 'work-excerpt', work.excerpt);
-  const more = element('a', 'text-link', '看看这个想法 →');
-  more.href = titleLink.href;
-  copy.append(meta, title, excerpt, more);
+  copy.append(meta, title, excerpt);
   row.append(link, copy);
   return row;
 }
@@ -102,7 +104,7 @@ function renderArticles() {
   if (!list) return;
   const buttons = [...$$('[data-category]')];
   const count = $('[data-article-count]');
-  const validCategories = new Set(['all', 'tech', 'life']);
+  const validCategories = new Set(['all', 'tech', 'life', 'ramble']);
   const url = new URL(location.href);
   let activeCategory = validCategories.has(url.searchParams.get('category')) ? (url.searchParams.get('category') || 'all') : 'all';
 
@@ -110,8 +112,10 @@ function renderArticles() {
     buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.category === activeCategory)));
     const visible = activeCategory === 'all' ? articles : articles.filter((article) => article.category === activeCategory);
     list.replaceChildren(...visible.map(makeArticleRow));
+    list.setAttribute('aria-busy', 'false');
+    list.classList.add('content-ready');
     count.textContent = `共 ${visible.length} 篇`;
-    document.title = `${activeCategory === 'all' ? '文章' : activeCategory === 'tech' ? '技术文章' : '生活文章'} · 晴屿`;
+    document.title = `${activeCategory === 'all' ? '文章' : activeCategory === 'tech' ? '技术文章' : activeCategory === 'life' ? '生活文章' : '碎碎念文章'} · 晴屿`;
     if (updateUrl) {
       const next = new URL(location.href);
       if (activeCategory === 'all') next.searchParams.delete('category');
@@ -157,6 +161,20 @@ function renderDetail(items, type) {
   const content = $('[data-detail-content]', detail);
   item.paragraphs.forEach((text) => content.append(element('p', '', text)));
   document.title = `${item.title} · 晴屿`;
+}
+
+function openArticleLink() {
+  const id = new URLSearchParams(location.search).get('id');
+  const article = articles.find(item => item.id === id);
+  if (article) {
+    const target = new URL(`posts/${encodeURIComponent(article.id)}.html`, document.baseURI);
+    target.hash = location.hash;
+    location.replace(target.href);
+    return;
+  }
+  $('[data-article-opening]').hidden = true;
+  $('[data-not-found]').hidden = false;
+  document.title = '文章未找到 · 晴屿';
 }
 
 const GUESTBOOK_KEY = 'qingyu.guestbook-demo.v1';
@@ -257,6 +275,70 @@ function setupNavigation() {
   });
 }
 
+function setupPostContents() {
+  const headings = $$('.post-section h2[id]');
+  const links = $$('.post-toc a[href^="#"], .post-sidebar a[href^="#"]');
+  if (!headings.length || !links.length) return;
+  let frame = 0;
+  let currentId;
+  const hashTarget = () => headings.find(heading => `#${heading.id}` === location.hash)?.id;
+  let anchorTarget = hashTarget();
+
+  function markCurrent(id) {
+    if (id === currentId) return;
+    currentId = id;
+    links.forEach((link) => {
+      if (link.hash === `#${id}`) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+
+  function sync() {
+    frame = 0;
+    if (anchorTarget) {
+      markCurrent(anchorTarget);
+      return;
+    }
+    let current = headings[0];
+    const threshold = Math.min(160, innerHeight * .25);
+    for (const heading of headings) {
+      if (heading.getBoundingClientRect().top <= threshold) current = heading;
+    }
+    const scrollable = document.documentElement.scrollHeight > innerHeight + 2;
+    if (scrollable && scrollY > 0 && Math.ceil(scrollY + innerHeight) >= document.documentElement.scrollHeight - 2) current = headings.at(-1);
+    markCurrent(current.id);
+  }
+
+  function schedule() {
+    if (!frame) frame = requestAnimationFrame(sync);
+  }
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('.post-toc a[href^="#"], .post-sidebar a[href^="#"]');
+    if (link) {
+      anchorTarget = link.hash.slice(1);
+      markCurrent(anchorTarget);
+    }
+  });
+  function resumeTracking() {
+    anchorTarget = undefined;
+    schedule();
+  }
+  document.addEventListener('wheel', resumeTracking, { passive: true });
+  document.addEventListener('touchmove', resumeTracking, { passive: true });
+  document.addEventListener('pointerdown', (event) => {
+    if (!event.target.closest?.('.post-toc, .post-sidebar')) resumeTracking();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.target.closest?.('input, textarea, [contenteditable="true"]')) return;
+    if (event.key === ' ' && event.target.closest?.('button, summary, select, [role="button"]')) return;
+    if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) resumeTracking();
+  });
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule);
+  window.addEventListener('hashchange', () => { anchorTarget = hashTarget(); schedule(); });
+  sync();
+}
+
 function setupSectionMarks() {
   if (page !== 'home') return;
   const marks = $$('[data-section-mark]');
@@ -279,32 +361,43 @@ function setupSectionMarks() {
 
 function setupSceneMotion() {
   const image = $('.scene-image[data-motion-src]');
-  const toggle = $('.motion-toggle');
-  if (!image || !toggle) return;
+  if (!image) return;
   const preference = matchMedia('(prefers-reduced-motion: reduce)');
-  const stillUrl = new URL(image.getAttribute('src'), location.href).href;
-  const movingUrl = new URL(image.dataset.motionSrc, location.href).href;
-  let paused = false;
+  const stillUrl = new URL(image.getAttribute('src'), document.baseURI).href;
+  const movingUrl = new URL(image.dataset.motionSrc, document.baseURI).href;
   let failed = false;
   let frame = 0;
+  let movingImage;
+  let motionReady = false;
+
+  function prepareMotion() {
+    if (movingImage) return;
+    movingImage = new Image();
+    movingImage.src = movingUrl;
+    movingImage.decode().then(() => {
+      motionReady = true;
+      sync();
+    }).catch(() => {
+      failed = true;
+      sync();
+    });
+  }
 
   function sync() {
     frame = 0;
     const bounds = image.getBoundingClientRect();
     const visible = bounds.bottom > 0 && bounds.top < innerHeight && bounds.right > 0 && bounds.left < innerWidth;
     const reduced = preference.matches;
-    const moving = visible && !document.hidden && !reduced && !paused && !failed;
+    const wantsMovement = visible && !document.hidden && !reduced && !failed;
+    if (wantsMovement) prepareMotion();
+    const moving = wantsMovement && motionReady;
     const nextUrl = moving ? movingUrl : stillUrl;
     if (image.src !== nextUrl) image.src = nextUrl;
-    image.dataset.motionState = moving ? 'running' : 'still';
-    toggle.disabled = reduced || failed;
-    toggle.setAttribute('aria-pressed', String(reduced || paused || failed));
-    toggle.textContent = reduced || failed ? '静态插画' : paused ? '开启微风' : '暂停微风';
+    image.dataset.motionState = moving ? 'running' : wantsMovement ? 'loading' : 'still';
   }
   function schedule() {
     if (!frame) frame = requestAnimationFrame(sync);
   }
-  toggle.addEventListener('click', () => { paused = !paused; sync(); });
   image.addEventListener('error', () => {
     if (image.src === movingUrl) { failed = true; sync(); }
   });
@@ -321,10 +414,15 @@ setupSectionMarks();
 setupSceneMotion();
 if (page === 'home') renderHome();
 if (page === 'articles') renderArticles();
-if (page === 'article') renderDetail(articles, 'article');
+if (page === 'article') openArticleLink();
+if (page === 'post') setupPostContents();
 if (page === 'works') {
   const list = $('[data-work-list]');
-  if (list) works.forEach((work) => list.append(makeWorkRow(work)));
+  if (list) {
+    list.replaceChildren(...works.map(makeWorkRow));
+    list.setAttribute('aria-busy', 'false');
+    list.classList.add('content-ready');
+  }
 }
 if (page === 'work') renderDetail(works, 'work');
 if (page === 'guestbook') renderGuestbook();

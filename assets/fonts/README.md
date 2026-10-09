@@ -1,11 +1,11 @@
 # 本地标题字体
 
-`lxgw-wenkai-headings.woff2` 是霞鹜文楷 Regular 的网页标题子集，使用 SIL Open Font License 1.1；完整授权文本见 [`OFL.txt`](OFL.txt)。当前文件为 13,028 字节、静态字重 400，WOFF2 cmap 覆盖 54 个 Unicode 码位。它只适用于本项目当前模块标题，不是完整字体。
+`lxgw-wenkai-headings.woff2` 是霞鹜文楷 Regular 的网页标题子集，使用 SIL Open Font License 1.1；完整授权文本见 [`OFL.txt`](OFL.txt)。当前文件为 12,800 字节、静态字重 400，WOFF2 cmap 覆盖 53 个 Unicode 码位。它只适用于本项目当前模块标题，不是完整字体。
 
 当前字体文件的精确 CSS 覆盖范围：
 
 ```css
-unicode-range: U+3002, U+4E00, U+4E0B, U+4E1C, U+4E86, U+4E8E, U+4E9B, U+4F5C, U+4F60, U+4F8B, U+4FDD, U+505A, U+516C, U+5173, U+5199, U+53E5, U+5427, U+54C1, U+5728, U+5750, U+597D, U+5C0F, U+5F00, U+5F55, U+6211, U+6280, U+6301, U+6587, U+6700, U+672F, U+6765, U+6811, U+6B22, U+6B63, U+6D3B, U+6D77, U+6F14, U+751F, U+7559, U+7684, U+793A, U+7AE0, U+7CFB, U+8054, U+897F, U+8A00, U+8BB0, U+8BDD, U+8FB9, U+8FCE, U+8FD1, U+8FD9, U+98CE, U+FF0C;
+unicode-range: U+3002, U+4E00, U+4E0B, U+4E1C, U+4E86, U+4E8E, U+4E9B, U+4F5C, U+4F60, U+4F8B, U+4FBF, U+4FDD, U+505A, U+516C, U+5173, U+5199, U+53E5, U+5427, U+54C1, U+5728, U+5750, U+597D, U+5C0F, U+5F00, U+5F20, U+5F55, U+6211, U+6280, U+6301, U+6587, U+6700, U+672F, U+6765, U+6B22, U+6B63, U+6D3B, U+6F14, U+751F, U+7559, U+7684, U+793A, U+7AE0, U+7B7E, U+7CFB, U+8054, U+897F, U+8A00, U+8BB0, U+8BDD, U+8FCE, U+8FD1, U+8FD9, U+FF0C;
 ```
 
 ## 重新构建
