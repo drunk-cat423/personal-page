@@ -276,6 +276,15 @@
   overflow: visible;
 }
 
+.waline-wall .wl-card > .wl-head.station-avatar-head::before {
+  content: '';
+  display: block;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  background: var(--station-avatar) center / contain no-repeat;
+}
+
 .waline-wall .wl-card .wl-head .wl-nick {
   position: relative;
   display: inline-block;
@@ -738,6 +747,46 @@ html[data-reply-transition]::view-transition-new(*) {
   .waline-wall .wl-cards > .wl-card-item {
     margin-bottom: 12px;
     padding: 16px 17px;
+  }
+
+  .waline-wall .wl-card > .wl-head.station-avatar-head {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    column-gap: 8px;
+    row-gap: 0;
+    align-items: start;
+  }
+
+  .waline-wall .wl-head.station-avatar-head::before {
+    grid-column: 1;
+    grid-row: 1;
+    margin-top: 8px;
+  }
+
+  .waline-wall .wl-head.station-avatar-head .wl-nick {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: start;
+    align-self: center;
+  }
+
+  .waline-wall .wl-head.station-avatar-head .wl-time {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: -3px;
+    line-height: 1.4;
+  }
+
+  .waline-wall .wl-head.station-avatar-head .wl-comment-actions {
+    grid-column: 3;
+    grid-row: 1;
+    margin-inline-start: 0;
+  }
+
+  .waline-wall .wl-head.station-avatar-head .wl-badge {
+    grid-column: 2 / -1;
+    justify-self: start;
+    margin: 2px 0 0;
   }
 
   .waline-wall .note-composer-head {

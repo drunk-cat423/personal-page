@@ -1,6 +1,7 @@
 import { isLocalWalineTrial, resolveWalineServerURL } from './waline-config.js';
 import { transitionReplyLayout } from './reply-motion.js';
 import { setupLikeMotion } from './like-motion.js';
+import { decorateWalineAvatarHeads } from './comment-avatars.js?v=20261010-avatars-footer';
 
 if (document.readyState === 'loading') {
   await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }));
@@ -51,6 +52,7 @@ function setupNoteWall(initialRootCount, readRootCount) {
   }
 
   function reconcileWall() {
+    decorateWalineAvatarHeads(mount);
     if (!initialContentShown) {
       const widget = mount.querySelector('[data-waline]');
       const ready = widget && !widget.querySelector(':scope > .wl-loading') &&

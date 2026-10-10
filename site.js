@@ -1,5 +1,6 @@
 import { articles, works, messages } from './content.js?v=20261010-detective-ink';
 import { setupPoseScene } from './scene-player.js?v=20261010-pose-player';
+import { createCommentAvatar } from './comment-avatars.js?v=20261010-avatars-footer';
 
 if (document.readyState === 'loading') {
   await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }));
@@ -95,7 +96,9 @@ function makeWorkRow(work) {
 function makeMessageRow(message, isDemo = false) {
   const row = element('article', 'message-row');
   const meta = element('div', 'message-meta');
-  meta.append(element('strong', 'message-author', message.author));
+  const author = element('div', 'message-author-group');
+  author.append(createCommentAvatar(message.author), element('strong', 'message-author', message.author));
+  meta.append(author);
   const date = element('time', 'message-date', message.date);
   date.dateTime = message.dateISO;
   meta.append(date);
@@ -103,7 +106,9 @@ function makeMessageRow(message, isDemo = false) {
   row.append(meta, body);
   if (message.reply) {
     const reply = element('div', 'owner-reply');
-    reply.append(element('strong', 'reply-label', 'LYW Station · 回复'), element('p', 'reply-body', message.reply));
+    const replyAuthor = element('div', 'reply-author-group');
+    replyAuthor.append(createCommentAvatar('LYW', 'comment-avatar--reply'), element('strong', 'reply-label', 'LYW · 回复'));
+    reply.append(replyAuthor, element('p', 'reply-body', message.reply));
     row.append(reply);
   } else if (isDemo) {
     row.append(element('p', 'demo-label', '仅保存在此浏览器 · 尚未公开'));
