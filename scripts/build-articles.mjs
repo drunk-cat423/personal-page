@@ -18,6 +18,16 @@ function escapeHTML(value) {
   })[char]);
 }
 
+function versionSceneAsset(value) {
+  if (!value.includes('/assets/illustrations/web/')) return value;
+  if (/[?&]v=20261010-scene-lite(?:&|#|$)/.test(value)) return value;
+  const hashIndex = value.indexOf('#');
+  const resource = hashIndex < 0 ? value : value.slice(0, hashIndex);
+  const hash = hashIndex < 0 ? '' : value.slice(hashIndex);
+  const separator = resource.includes('?') ? '&' : '?';
+  return `${resource}${separator}v=20261010-scene-lite${hash}`;
+}
+
 function validateArticles(items) {
   const articleIds = new Set();
   for (const article of items) {
@@ -40,7 +50,10 @@ function validateArticles(items) {
         || typeof illustration.src !== 'string' || !illustration.src.trim()
         || typeof illustration.alt !== 'string' || !illustration.alt.trim()
         || (illustration.motionSrc !== undefined
-          && (typeof illustration.motionSrc !== 'string' || !illustration.motionSrc.trim()))) {
+          && (typeof illustration.motionSrc !== 'string' || !illustration.motionSrc.trim())
+          || illustration.motionSrcMobile !== undefined
+          && (typeof illustration.motionSrcMobile !== 'string' || !illustration.motionSrcMobile.trim()
+            || illustration.motionSrc === undefined))) {
         throw new Error(`Article illustration is invalid: ${article.id}`);
       }
     }
@@ -92,7 +105,7 @@ function renderArticle(article, index) {
   const { toc, body } = renderSections(article);
   const illustration = article.illustration;
   const illustrationMarkup = illustration
-    ? `<img class="scene-image" src="${escapeHTML(illustration.src)}"${illustration.motionSrc ? ` data-motion-src="${escapeHTML(illustration.motionSrc)}"` : ''} alt="${escapeHTML(illustration.alt)}">`
+    ? `<img class="scene-image" src="${escapeHTML(versionSceneAsset(illustration.src))}"${illustration.motionSrc ? ` data-motion-src="${escapeHTML(versionSceneAsset(illustration.motionSrc))}"` : ''}${illustration.motionSrcMobile ? ` data-motion-src-mobile="${escapeHTML(versionSceneAsset(illustration.motionSrcMobile))}"` : ''} alt="${escapeHTML(illustration.alt)}">`
     : '';
   const title = escapeHTML(article.title);
   const description = escapeHTML(article.excerpt);
@@ -113,7 +126,7 @@ function renderArticle(article, index) {
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css">
   <link rel="stylesheet" href="../article.css">
-  <script type="module" src="../site.js?v=20261010-lyw-station" async></script>
+  <script type="module" src="../site.js?v=20261010-scene-lite" async></script>
 </head>
 <body data-page="post">
   <a class="skip-link" href="#main-content">跳到主要内容</a>

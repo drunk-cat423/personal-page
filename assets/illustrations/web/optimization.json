@@ -1,0 +1,52 @@
+{
+  "meadow": {
+    "original_bytes": 14568502,
+    "source_frames": 73,
+    "duration_ms": 5999,
+    "variants": [
+      {
+        "path": "meadow-wind-960.webp",
+        "bytes": 4077112,
+        "width": 960,
+        "quality": 70,
+        "frames": 73,
+        "duration_ms": 5999,
+        "transparent": true
+      },
+      {
+        "path": "meadow-wind-640.webp",
+        "bytes": 2129586,
+        "width": 640,
+        "quality": 68,
+        "frames": 73,
+        "duration_ms": 5999,
+        "transparent": true
+      }
+    ]
+  },
+  "coast": {
+    "original_bytes": 7717622,
+    "source_frames": 73,
+    "duration_ms": 5999,
+    "variants": [
+      {
+        "path": "coast-wind-960.webp",
+        "bytes": 2248958,
+        "width": 960,
+        "quality": 70,
+        "frames": 73,
+        "duration_ms": 5999,
+        "transparent": true
+      },
+      {
+        "path": "coast-wind-640.webp",
+        "bytes": 1197570,
+        "width": 640,
+        "quality": 68,
+        "frames": 73,
+        "duration_ms": 5999,
+        "transparent": true
+      }
+    ]
+  }
+}

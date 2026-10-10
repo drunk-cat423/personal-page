@@ -389,11 +389,16 @@ function setupSectionMarks() {
 }
 
 function setupSceneMotion() {
+  document.querySelectorAll('link[data-scene-preload]').forEach((link) => link.remove());
   const image = $('.scene-image[data-motion-src]');
   if (!image) return;
   const preference = matchMedia('(prefers-reduced-motion: reduce)');
-  const stillUrl = new URL(image.getAttribute('src'), document.baseURI).href;
-  const movingUrl = new URL(image.dataset.motionSrc, document.baseURI).href;
+  const mobile = matchMedia('(max-width: 600px)').matches;
+  const motionSource = mobile && image.dataset.motionSrcMobile ? image.dataset.motionSrcMobile : image.dataset.motionSrc;
+  const posterUrl = new URL(mobile && image.dataset.posterMobile ? image.dataset.posterMobile : image.getAttribute('src'), document.baseURI).href;
+  const movingUrl = new URL(motionSource, document.baseURI).href;
+  const posterSrcset = image.getAttribute('srcset');
+  const posterSizes = image.getAttribute('sizes');
   let failed = false;
   let frame = 0;
   let movingImage;
@@ -420,15 +425,22 @@ function setupSceneMotion() {
     const wantsMovement = visible && !document.hidden && !reduced && !failed;
     if (wantsMovement) prepareMotion();
     const moving = wantsMovement && motionReady;
-    const nextUrl = moving ? movingUrl : stillUrl;
-    if (image.src !== nextUrl) image.src = nextUrl;
+    if (moving) {
+      if (image.hasAttribute('srcset')) image.removeAttribute('srcset');
+      if (image.hasAttribute('sizes')) image.removeAttribute('sizes');
+      if (image.src !== movingUrl) image.src = movingUrl;
+    } else {
+      if (image.src !== posterUrl) image.src = posterUrl;
+      if (posterSrcset) image.setAttribute('srcset', posterSrcset);
+      if (posterSizes) image.setAttribute('sizes', posterSizes);
+    }
     image.dataset.motionState = moving ? 'running' : wantsMovement ? 'loading' : 'still';
   }
   function schedule() {
     if (!frame) frame = requestAnimationFrame(sync);
   }
   image.addEventListener('error', () => {
-    if (image.src === movingUrl) { failed = true; sync(); }
+    if (image.src === movingUrl || image.currentSrc === movingUrl) { failed = true; sync(); }
   });
   preference.addEventListener('change', sync);
   document.addEventListener('visibilitychange', schedule);

@@ -9,7 +9,9 @@
   <title>LYW Station</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="site.css"><script type="module" src="site.js?v=20261010-lyw-station" async></script>
+  <link rel="preload" as="image" data-scene-preload href="assets/illustrations/web/meadow-wind-960.webp?v=20261010-scene-lite" media="(min-width: 601px) and (prefers-reduced-motion: no-preference)">
+  <link rel="preload" as="image" data-scene-preload href="assets/illustrations/web/meadow-wind-640.webp?v=20261010-scene-lite" media="(max-width: 600px) and (prefers-reduced-motion: no-preference)">
+  <link rel="stylesheet" href="site.css"><script type="module" src="site.js?v=20261010-scene-lite" async></script>
 </head>
 <body data-page="home">
   <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -22,7 +24,7 @@
     <main id="main-content">
       <section class="hero" aria-labelledby="welcome-title">
         <div class="hero-copy"><p class="eyebrow">NOTES, MAKINGS &amp; EVERYDAY WONDERS</p><h1 id="welcome-title">给日常，留一片<span class="title-mark">晴空</span>。</h1><p class="welcome-copy">记一些想法，也留住生活里轻轻发光的瞬间。</p><p class="hero-aside">你好，今天也慢慢来。</p></div>
-        <div class="hero-art"><img class="scene-image" src="assets/illustrations/meadow-static.png" data-motion-src="assets/illustrations/cel-six/meadow-six-wind.webp" width="1983" height="793" alt="开阔草原上的大树与白云，淡蓝色钢笔和水彩手绘"></div>
+        <div class="hero-art"><img class="scene-image" src="assets/illustrations/web/meadow-still-1280.webp?v=20261010-scene-lite" srcset="assets/illustrations/web/meadow-still-640.webp?v=20261010-scene-lite 640w, assets/illustrations/web/meadow-still-1280.webp?v=20261010-scene-lite 1280w" sizes="(max-width: 600px) 100vw, 960px" data-poster-mobile="assets/illustrations/web/meadow-still-640.webp?v=20261010-scene-lite" data-motion-src="assets/illustrations/web/meadow-wind-960.webp?v=20261010-scene-lite" data-motion-src-mobile="assets/illustrations/web/meadow-wind-640.webp?v=20261010-scene-lite" width="1983" height="793" alt="开阔草原上的大树与白云，淡蓝色钢笔和水彩手绘"></div>
       </section>
       <section class="section-block" id="articles" aria-labelledby="home-articles-title">
         <div class="section-head"><div><p class="eyebrow">RECENTLY ON MY MIND</p><h2 id="home-articles-title">最近，<span class="section-mark section-mark--underline" data-section-mark>记下<svg class="section-mark-svg" viewBox="0 0 100 16" aria-hidden="true" focusable="false"><path class="section-mark-ink" pathLength="1" d="M4 9 C26 5 51 12 96 7"></path><path class="section-mark-echo" d="M14 13 C37 10 58 13 81 11"></path></svg></span>了这些</h2></div><a class="view-all" href="articles.html">所有文章 <span aria-hidden="true">↗</span></a></div>
