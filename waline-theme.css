@@ -282,7 +282,9 @@
   flex: 0 0 28px;
   width: 28px;
   height: 28px;
-  background: var(--station-avatar) center / contain no-repeat;
+  border: 1px solid #bed3e3;
+  border-radius: 50%;
+  background: #f4f9fc var(--station-avatar) center / 72% 72% no-repeat;
 }
 
 .waline-wall .wl-card .wl-head .wl-nick {

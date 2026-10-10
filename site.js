@@ -1,6 +1,6 @@
 import { articles, works, messages } from './content.js?v=20261010-detective-ink';
 import { setupPoseScene } from './scene-player.js?v=20261010-pose-player';
-import { createCommentAvatar } from './comment-avatars.js?v=20261010-avatars-footer';
+import { createCommentAvatar } from './comment-avatars.js?v=20261010-avatar-icons';
 
 if (document.readyState === 'loading') {
   await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }));

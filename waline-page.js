@@ -1,7 +1,7 @@
 import { isLocalWalineTrial, resolveWalineServerURL } from './waline-config.js';
 import { transitionReplyLayout } from './reply-motion.js';
 import { setupLikeMotion } from './like-motion.js';
-import { decorateWalineAvatarHeads } from './comment-avatars.js?v=20261010-avatars-footer';
+import { decorateWalineAvatarHeads } from './comment-avatars.js?v=20261010-avatar-icons';
 
 if (document.readyState === 'loading') {
   await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }));

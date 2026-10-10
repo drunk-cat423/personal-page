@@ -1,7 +1,7 @@
 const AVATARS = [
-  'assets/avatars/paper-plane-v1.webp',
-  'assets/avatars/windmill-v1.webp',
-  'assets/avatars/flower-v1.webp',
+  'assets/avatars/paper-plane-v2.svg',
+  'assets/avatars/windmill-v2.svg',
+  'assets/avatars/flower-v2.svg',
 ];
 
 export function normalizeAvatarNickname(nickname) {
@@ -29,6 +29,10 @@ export function createCommentAvatar(nickname, extraClass = '') {
   return avatar;
 }
 
+export function normalizeCommentTimeLabel(label) {
+  return /^\d+\s*秒前$/u.test(label.trim()) ? '刚刚' : label;
+}
+
 export function decorateWalineAvatarHeads(root) {
   for (const head of root.querySelectorAll('.wl-card > .wl-head')) {
     const nickname = head.querySelector(':scope > .wl-nick')?.textContent ?? '';
@@ -40,5 +44,10 @@ export function decorateWalineAvatarHeads(root) {
       head.style.setProperty('--station-avatar', avatarValue);
     }
     head.classList.add('station-avatar-head');
+    const time = head.querySelector(':scope > .wl-time');
+    if (time) {
+      const label = normalizeCommentTimeLabel(time.textContent);
+      if (label !== time.textContent) time.textContent = label;
+    }
   }
 }
