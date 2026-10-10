@@ -143,6 +143,9 @@ h1, h2, h3 { color: var(--heading-ink); font-family: var(--serif); font-weight: 
 .hero-aside svg { width: 18px; height: 18px; vertical-align: -4px; margin-left: 4px; }
 .hero-art { width: min(100%, 960px); margin: 15px auto 0; overflow: hidden; }
 .scene-image, .hero-art img { display: block; width: 100%; height: auto; }
+.scene-player-surface { position: relative; }
+.scene-poster-hidden { visibility: hidden; }
+.scene-canvas { position: absolute; top: 0; left: 0; height: 100%; pointer-events: none; }
 .hero-footnote { margin: 6px 0 0; color: #8297ab; font: 17px var(--hand); }
 .hero-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; margin-top: 4px; }
 .hero-links a { min-height: 44px; display: inline-flex; align-items: center; color: #5b7e9f; font-size: 12px; text-decoration: none; }
@@ -368,7 +371,7 @@ body:not([data-page='home']) .page-intro + .section-block { margin-top: 28px; }
   .welcome-copy { max-width: 310px; margin-top: 9px; font-size: 14px; }
   .hero-aside { margin-top: 11px; font-size: 15px; }
   .hero-art { width: 100%; margin-top: 10px; }
-  .hero:not(.page-intro) .hero-art img { width: 140%; max-width: none; margin-left: -36%; }
+  .hero:not(.page-intro) .hero-art :is(img, .scene-canvas) { width: 140%; max-width: none; margin-left: -36%; }
   .hero-footnote { font-size: 15px; }
   .hero-links { gap: 15px; }
   .hero-links a { font-size: 11px; }
@@ -411,8 +414,8 @@ body:not([data-page='home']) .page-intro + .section-block { margin-top: 28px; }
   .page-intro h1 { font-size: 31px; }
   .page-description { font-size: 14px; }
   .compact-scene { margin-top: 3px; }
-  .compact-scene img { width: 122%; max-width: none; margin-left: -20%; }
-  body[data-page='guestbook'] .compact-scene img { width: 100%; max-width: 100%; margin-left: 0; }
+  .compact-scene :is(img, .scene-canvas) { width: 122%; max-width: none; margin-left: -20%; }
+  body[data-page='guestbook'] .compact-scene :is(img, .scene-canvas) { width: 100%; max-width: 100%; margin-left: 0; }
   .page-content, .listing-content { margin-top: 14px; }
   .category-filters { gap: 3px; margin-bottom: 6px; }
   .category-filters button { padding: 0 12px; }

@@ -124,9 +124,9 @@ function renderArticle(article, index) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="../site.css">
-  <link rel="stylesheet" href="../article.css">
-  <script type="module" src="../site.js?v=20261010-scene-lite" async></script>
+  <link rel="stylesheet" href="../site.css?v=20261010-pose-player">
+  <link rel="stylesheet" href="../article.css?v=20261010-pose-player">
+  <script type="module" src="../site.js?v=20261010-pose-player" async></script>
 </head>
 <body data-page="post">
   <a class="skip-link" href="#main-content">跳到主要内容</a>

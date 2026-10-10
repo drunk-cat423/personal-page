@@ -1,4 +1,5 @@
 import { articles, works, messages } from './content.js?v=20261010-detective-ink';
+import { setupPoseScene } from './scene-player.js?v=20261010-pose-player';
 
 if (document.readyState === 'loading') {
   await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }));
@@ -390,7 +391,8 @@ function setupSectionMarks() {
 
 function setupSceneMotion() {
   document.querySelectorAll('link[data-scene-preload]').forEach((link) => link.remove());
-  const image = $('.scene-image[data-motion-src]');
+  document.querySelectorAll('.scene-image[data-scene-poses]').forEach(setupPoseScene);
+  const image = $('.scene-image[data-motion-src]:not([data-scene-poses])');
   if (!image) return;
   const preference = matchMedia('(prefers-reduced-motion: reduce)');
   const mobile = matchMedia('(max-width: 600px)').matches;

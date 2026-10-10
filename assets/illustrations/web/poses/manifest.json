@@ -1,0 +1,248 @@
+{
+  "meadow": {
+    "source_sequence": [
+      "a",
+      "d",
+      "c",
+      "b",
+      "e",
+      "f"
+    ],
+    "quality": 96,
+    "alpha_quantization": false,
+    "cycle_ms": 6000,
+    "hold_ms": 500,
+    "dissolve_ms": 500,
+    "variants": {
+      "1280": {
+        "total_bytes": 1331858,
+        "files": [
+          {
+            "pose": "a",
+            "source_pose": "a",
+            "file": "assets/illustrations/web/poses/meadow/1280/a.webp",
+            "bytes": 230462,
+            "sha256": "2675686a6caaa465bbc4cf42684fc34293d51711afb924d1565bdf1f69693e8f",
+            "source_sha256": "aebe0a64f0f2ad2268d6c13848718ddca5c55706be286f3cd551d34341b72277"
+          },
+          {
+            "pose": "b",
+            "source_pose": "d",
+            "file": "assets/illustrations/web/poses/meadow/1280/b.webp",
+            "bytes": 219786,
+            "sha256": "04fc846fb06053596ac9151a9f6a607a06819c7da42350fd914b2d2d68bccc2a",
+            "source_sha256": "8bffe0585d22e71a6444e6431088131f24af063c441b203c664cc5df6b9cf265"
+          },
+          {
+            "pose": "c",
+            "source_pose": "c",
+            "file": "assets/illustrations/web/poses/meadow/1280/c.webp",
+            "bytes": 225864,
+            "sha256": "e97805f283c07c0a901148ba07103de8e548758e1ba5cadbb1b65eed9721950a",
+            "source_sha256": "95578b8bb07157b7b9a9bd971d67bfd0c927e6a6fcd1d03c3d6999145c6bbd5e"
+          },
+          {
+            "pose": "d",
+            "source_pose": "b",
+            "file": "assets/illustrations/web/poses/meadow/1280/d.webp",
+            "bytes": 218536,
+            "sha256": "3b411bfdc4dd9f7f23c621de24b1f04c7b8fc9c68a176fe15be809adc26dc4b1",
+            "source_sha256": "2bf2b9044879ea6a776b7f84fd6be741fcb6e4e4fc76c011fd283766a8996da4"
+          },
+          {
+            "pose": "e",
+            "source_pose": "e",
+            "file": "assets/illustrations/web/poses/meadow/1280/e.webp",
+            "bytes": 221842,
+            "sha256": "61a5a0f955f750efcbb7bb06deb04c7fe632a21814637ec971f5ee62ca5bb366",
+            "source_sha256": "2f4ba6eb9ead8efe650a6ab6c58a9fe4531d05286cb0f238e90b88359ed728fd"
+          },
+          {
+            "pose": "f",
+            "source_pose": "f",
+            "file": "assets/illustrations/web/poses/meadow/1280/f.webp",
+            "bytes": 215368,
+            "sha256": "d784664419c36b95c82f914d4a7e2935ec4cb651b1af2022aa86572a7b7f609e",
+            "source_sha256": "110ae6d67d08a364ee7e7c1c6d7f5e3a665fd1c6dbeb6736996100c27e9be35c"
+          }
+        ]
+      },
+      "960": {
+        "total_bytes": 857962,
+        "files": [
+          {
+            "pose": "a",
+            "source_pose": "a",
+            "file": "assets/illustrations/web/poses/meadow/960/a.webp",
+            "bytes": 144570,
+            "sha256": "db3d5b56863eecbe2a8a78198622f52072df63753e0a824b103842b575d6a459",
+            "source_sha256": "aebe0a64f0f2ad2268d6c13848718ddca5c55706be286f3cd551d34341b72277"
+          },
+          {
+            "pose": "b",
+            "source_pose": "d",
+            "file": "assets/illustrations/web/poses/meadow/960/b.webp",
+            "bytes": 142520,
+            "sha256": "1d9bc148981270f7ad99de7c069528b124e9e9ddd7f19d6afd04219818374efb",
+            "source_sha256": "8bffe0585d22e71a6444e6431088131f24af063c441b203c664cc5df6b9cf265"
+          },
+          {
+            "pose": "c",
+            "source_pose": "c",
+            "file": "assets/illustrations/web/poses/meadow/960/c.webp",
+            "bytes": 146172,
+            "sha256": "7868c4a43c419447bb62ef849ccf0f45a29cc8860f400e314b5c1684202a4be4",
+            "source_sha256": "95578b8bb07157b7b9a9bd971d67bfd0c927e6a6fcd1d03c3d6999145c6bbd5e"
+          },
+          {
+            "pose": "d",
+            "source_pose": "b",
+            "file": "assets/illustrations/web/poses/meadow/960/d.webp",
+            "bytes": 141458,
+            "sha256": "9c9fec482ce7f582d0b8bb772c11798ff0e1b1004de62ac30a5f074b9659c972",
+            "source_sha256": "2bf2b9044879ea6a776b7f84fd6be741fcb6e4e4fc76c011fd283766a8996da4"
+          },
+          {
+            "pose": "e",
+            "source_pose": "e",
+            "file": "assets/illustrations/web/poses/meadow/960/e.webp",
+            "bytes": 143602,
+            "sha256": "04db21536e8de59445953f7652ccb470510c919c36901be4ea66c3b8ade26df1",
+            "source_sha256": "2f4ba6eb9ead8efe650a6ab6c58a9fe4531d05286cb0f238e90b88359ed728fd"
+          },
+          {
+            "pose": "f",
+            "source_pose": "f",
+            "file": "assets/illustrations/web/poses/meadow/960/f.webp",
+            "bytes": 139640,
+            "sha256": "350075ab64d7cae26bd9a89e4975a58b29e9769788b5e4341579cfa9496dec38",
+            "source_sha256": "110ae6d67d08a364ee7e7c1c6d7f5e3a665fd1c6dbeb6736996100c27e9be35c"
+          }
+        ]
+      }
+    }
+  },
+  "coast": {
+    "source_sequence": [
+      "a",
+      "c",
+      "b",
+      "d",
+      "e",
+      "f"
+    ],
+    "quality": 96,
+    "alpha_quantization": false,
+    "cycle_ms": 6000,
+    "hold_ms": 500,
+    "dissolve_ms": 500,
+    "variants": {
+      "1280": {
+        "total_bytes": 740034,
+        "files": [
+          {
+            "pose": "a",
+            "source_pose": "a",
+            "file": "assets/illustrations/web/poses/coast/1280/a.webp",
+            "bytes": 127034,
+            "sha256": "35314283e87f9f76326e2e81c2cbc66afe531e45a06e0cb7708686eaa946755e",
+            "source_sha256": "bd2853fa543e1deaec3d37a510482146a7a8dcef0f47ca7408bcc6ee05bc7280"
+          },
+          {
+            "pose": "b",
+            "source_pose": "c",
+            "file": "assets/illustrations/web/poses/coast/1280/b.webp",
+            "bytes": 122470,
+            "sha256": "6d78c2bdb4af99d615cc15bf3deb716f9f086b1bf04b0ec89498423c1281360e",
+            "source_sha256": "83c6fd0f1ceb5c9a605b594efedb7b094054a4f263bf56bab638e64ca4a03348"
+          },
+          {
+            "pose": "c",
+            "source_pose": "b",
+            "file": "assets/illustrations/web/poses/coast/1280/c.webp",
+            "bytes": 123774,
+            "sha256": "872f916b8d63e2ddabc2ed7272e167171373d394d3e45d97f310b91a51712d46",
+            "source_sha256": "99b3763390c379165156ca4384f54c0afbd7c7d5c80476b13ba87167ddfcaef5"
+          },
+          {
+            "pose": "d",
+            "source_pose": "d",
+            "file": "assets/illustrations/web/poses/coast/1280/d.webp",
+            "bytes": 121070,
+            "sha256": "72dca917b43ec8295321d0df9550e6fc5c9c2d0695b2d0b9abf35f20676fd7f6",
+            "source_sha256": "21330bc9a640a0ce770ec2d43a88c235469d8d5e823bd9e2a13600e2d9e97b49"
+          },
+          {
+            "pose": "e",
+            "source_pose": "e",
+            "file": "assets/illustrations/web/poses/coast/1280/e.webp",
+            "bytes": 123822,
+            "sha256": "800a6d73ab69ffe6973765c8b86ce8033afdd448b743456c13ae4f055855d427",
+            "source_sha256": "336e1311e9a346946e20ed2098eb9059587d8e2da36f537e41af9292935b4e51"
+          },
+          {
+            "pose": "f",
+            "source_pose": "f",
+            "file": "assets/illustrations/web/poses/coast/1280/f.webp",
+            "bytes": 121864,
+            "sha256": "1c34cecc0337433cae6cd2e0acae436c510211321d16d766790c836a8faa77b9",
+            "source_sha256": "c199dde80ed519a96e9c9e37b7c2d6878daf9a3f238e61de8d2595b84c58306d"
+          }
+        ]
+      },
+      "960": {
+        "total_bytes": 475388,
+        "files": [
+          {
+            "pose": "a",
+            "source_pose": "a",
+            "file": "assets/illustrations/web/poses/coast/960/a.webp",
+            "bytes": 79268,
+            "sha256": "f84b9c5d487d2e2487a2559e2e413a3d535f5c5f0e6365cf6582a05ebdae129b",
+            "source_sha256": "bd2853fa543e1deaec3d37a510482146a7a8dcef0f47ca7408bcc6ee05bc7280"
+          },
+          {
+            "pose": "b",
+            "source_pose": "c",
+            "file": "assets/illustrations/web/poses/coast/960/b.webp",
+            "bytes": 79364,
+            "sha256": "6b411cb5bfc262b10870f421dc3f0454d12f678344e9005fcac22af826dd2093",
+            "source_sha256": "83c6fd0f1ceb5c9a605b594efedb7b094054a4f263bf56bab638e64ca4a03348"
+          },
+          {
+            "pose": "c",
+            "source_pose": "b",
+            "file": "assets/illustrations/web/poses/coast/960/c.webp",
+            "bytes": 79458,
+            "sha256": "459f5edd48653d29c0babb297e7b29fceb081416f3a0830e0a0959a5e37bdb69",
+            "source_sha256": "99b3763390c379165156ca4384f54c0afbd7c7d5c80476b13ba87167ddfcaef5"
+          },
+          {
+            "pose": "d",
+            "source_pose": "d",
+            "file": "assets/illustrations/web/poses/coast/960/d.webp",
+            "bytes": 78912,
+            "sha256": "48c623ab4e07ccd3033b30cd07c0492aa04e948285c41431952bccee12fcd539",
+            "source_sha256": "21330bc9a640a0ce770ec2d43a88c235469d8d5e823bd9e2a13600e2d9e97b49"
+          },
+          {
+            "pose": "e",
+            "source_pose": "e",
+            "file": "assets/illustrations/web/poses/coast/960/e.webp",
+            "bytes": 80386,
+            "sha256": "e81c7f43d43cf7640811eac2dc328b7eeedc3894c6c6401ab784606626f414f6",
+            "source_sha256": "336e1311e9a346946e20ed2098eb9059587d8e2da36f537e41af9292935b4e51"
+          },
+          {
+            "pose": "f",
+            "source_pose": "f",
+            "file": "assets/illustrations/web/poses/coast/960/f.webp",
+            "bytes": 78000,
+            "sha256": "d6df045021598cc2d67d92e4d6cd7c6c1e012f21cd3b82870ee56de2dac7fc2a",
+            "source_sha256": "c199dde80ed519a96e9c9e37b7c2d6878daf9a3f238e61de8d2595b84c58306d"
+          }
+        ]
+      }
+    }
+  }
+}
