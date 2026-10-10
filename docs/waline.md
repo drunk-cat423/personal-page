@@ -4,7 +4,19 @@
 
 正式留言页使用本地打包的 `@waline/client` 3.16.0 客户端，许可证以 `assets/vendor/waline/LICENSE` 随包文件为准。Waline 官方资料包括[客户端属性](https://waline.js.org/reference/client/props.html)、[客户端 API](https://waline.js.org/reference/client/api.html)、[服务端 HTTP API](https://waline.js.org/reference/server/api.html)和[自定义语言](https://waline.js.org/cookbook/customize/locale.html)。本页使用本地分发文件，不从 CDN 加载客户端。设置了 `path: '/guestbook'`、昵称必填、千字上限、每页六条、禁用登录、搜索、图片上传和表情包；组件版权保留。
 
-本机试用服务使用 `@waline/vercel` 1.43.4 和 SQLite。服务启动脚本 `scripts/start-waline-trial.mjs` 与数据库数据由本机服务流程管理，前端不直连数据库。
+正式服务与本机试用服务均使用 `@waline/vercel` 1.43.4 和 SQLite，数据分别保存；前端不直连数据库。
+
+## 正式服务
+
+正式留言页为 `https://linyouwei.top/guestbook.html`。`waline-config.js` 的 `serverURL` 覆盖值保持为空，`SITE_HOSTS` 中的 `linyouwei.top` 和 `www.linyouwei.top` 自动连接当前页面同源的 `/waline`。Nginx 剥离 `/waline/` 前缀后代理到仅监听 `127.0.0.1:8360` 的后端；生产配置为 `SITE_URL=https://linyouwei.top`、`SERVER_URL=https://linyouwei.top/waline`。
+
+服务器入口是 `/opt/qingyu-waline/scripts/start-waline-production.mjs`，由独立用户运行的 `qingyu-waline.service` 管理；服务运行时在 `/opt/qingyu-waline/runtime`，Node.js 22.23.3 安装于 `/opt/node-v22.23.3`。数据库 `/var/lib/qingyu-waline/waline.sqlite` 与持久 JWT 密钥 `.jwt-secret` 权限为 600。启动器只在数据库不存在时复制空库，不覆盖已有数据，也不继承其他应用的数据库、邮件或 Webhook 配置。
+
+访客可匿名留言，`IPQPS=30` 表示同一 IP 的留言间隔为 30 秒；未开启留言审核。邮件通知未配置，位置与 UA 显示关闭，默认 Akismet 关闭。生产启动器将外部 OAuth 服务列表设为空，并在 REST 路由解析后禁用整个 OAuth 控制器，避免每次请求依赖外部 OAuth 服务。
+
+账号注册只允许服务器本机：路由解析后 `user/post` 动作检查来源 IP，优先读取 Nginx 强制覆盖的 `X-Real-IP=$remote_addr`，否则使用连接来源；仅允许 `127.0.0.1`、`::1`、`::ffff:127.0.0.1`。该检查覆盖 ThinkJS 路径别名，匿名留言与已有账号的邮箱密码/JWT 登录仍保留。首个管理员已在服务器本地创建，邮箱为 `admin@linyouwei.top`；随机密码仅保存在服务器 `/root/site-backups/20261010-migration/waline-admin.json`（权限 600），不进入仓库。
+
+`https://linyouwei.top/waline/ui` 已在浏览器正常显示登录表单，管理页面默认从 unpkg 加载官方管理脚本。管理员登录与删除已通过真实 API 验证；未在浏览器中填写管理员密码。正式页面的匿名回复已通过浏览器提交，点赞点击后从 1 立即变为 2，后台计数确认一致；重启后根留言、回复、计数与 JWT 保持。验收测试数据均已删除，验收结束时留言总数为 0。内存限制、备份、重启和域名回滚见 [部署说明](deployment.md)。本机试用数据没有迁移到生产。
 
 ## 运行与配置
 
@@ -26,7 +38,7 @@ node scripts/start-waline-trial.mjs
 node server.mjs
 ```
 
-浏览器打开 `http://127.0.0.1:4173/guestbook.html`。静态预览由 Node.js 18 或更新版本运行；本机服务要求 Node.js 22。启动脚本在环境版本不符时优先使用可配置的本机临时 Node 22 或 `WALINE_NODE_PATH`。数据库和服务密钥保存在忽略的 `outputs/waline-trial/.data/`，不要提交该目录。`waline-config.js` 中的 `serverURL` 默认是空值：页面仅在 `localhost` 或 `127.0.0.1` 自动连接同主机的 `:8360` 本机服务；其他主机名会显示“留言服务尚未配置”，不会尝试访问 `localhost` 或第三方演示服务。若将来配置其他真实服务地址，在同一配置文件中填写它；页面会连接该地址并按其实际存储服务保存留言。
+浏览器打开 `http://127.0.0.1:4173/guestbook.html`。静态预览由 Node.js 18 或更新版本运行；本机服务要求 Node.js 22。启动脚本在环境版本不符时优先使用可配置的本机临时 Node 22 或 `WALINE_NODE_PATH`。数据库和服务密钥保存在忽略的 `outputs/waline-trial/.data/`，不要提交该目录。`waline-config.js` 中的 `serverURL` 默认是空值：页面在 `localhost` 或 `127.0.0.1` 自动连接同主机的 `:8360` 本机服务，在两个正式站点主机名上连接同源 `/waline`；其余主机名会显示“留言服务尚未配置”，不会尝试访问 `localhost` 或第三方演示服务。配置其他真实服务时，可在同一文件中填写覆盖地址。
 
 初始化前页面会对配置的服务请求 `/api/comment`，五秒超时，并要求 Waline 1.43.4 响应成功且 `data.data` 是数组；服务不可用、响应无效或客户端初始化失败时显示“留言服务未连接”和重试按钮。没有配置服务时不显示重试。
 
@@ -50,7 +62,7 @@ node server.mjs
 
 ## 样式与语言
 
-本机服务通过 Waline 的自定义 model 接口修复 `@waline/core` 0.1.0 的点赞返回错误：匿名点赞只更新 like 时，移除该版本额外填入的 `comment: undefined`，让存储返回原有正文并正常完成 Markdown 格式化。数据库写入和权限检查仍由官方服务负责，未修改服务安装包。
+正式服务与本机服务通过 Waline 的自定义 model 接口修复 `@waline/core` 0.1.0 的点赞返回错误：匿名点赞只更新 like 时，移除该版本额外填入的 `comment: undefined`，让存储返回原有正文并正常完成 Markdown 格式化。数据库写入和权限检查仍由官方服务负责，未修改服务安装包。
 
 本地客户端 3.16.0 仅将点赞事件处理函数接到 `like-state.js`，保留官方 Vue 留言数据、图标、计数和本地点赞记录。点击即更新原有状态，接口成功时以服务端计数校准，失败时恢复本条原状态并提示；同一条请求未结束时不重复提交，其他便签的并发点赞互不覆盖。`scripts/like-state.test.mjs` 使用 Node 内置测试覆盖延迟响应、重复点击及失败回滚。替换 vendor 客户端时需保留这一处调用和模块导入，MIT 许可证随包保留。
 
@@ -58,6 +70,6 @@ node server.mjs
 
 `guestbook.html` 按顺序加载 Waline 官方 `waline.css`、主站 `site.css` 和 `waline-theme.css`。主题文件设置 Waline 提供的 `--waline-*` 变量，并在 `.wl-*` 类范围内覆盖留言卡片、嵌套回复、输入字号、按钮触控尺寸、固定编辑区与编辑 Popover 外观。除上述点赞事件处理外，评论内容及表单继续由官方组件渲染。
 
-昵称和占位提示通过客户端 3.16.0 类型声明中的真实 locale 键 `nick` 与 `placeholder` 设置。服务端登录关闭，但官方排序、预览、回复、分页与版权信息保留。
+昵称和占位提示通过客户端 3.16.0 类型声明中的真实 locale 键 `nick` 与 `placeholder` 设置。留言页隐藏访客登录入口，管理员服务端登录仍保留；官方排序、预览、回复、分页与版权信息保留。
 
 本机启动器只向子进程传递必要的系统环境变量和本机配置，不继承其他数据库、邮件或 Webhook 服务的配置。它只监听 127.0.0.1:8360，不用于云端正式部署。

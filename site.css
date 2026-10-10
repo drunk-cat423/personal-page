@@ -188,6 +188,8 @@ body[data-page='home'] #works .section-head::before { position: absolute; z-inde
 .work-row { display: grid; grid-template-columns: minmax(230px, .78fr) minmax(0, 1.22fr); align-items: center; gap: 40px; }
 .work-cover { position: relative; display: flex; align-items: center; justify-content: center; min-height: 224px; padding: 22px 26px; overflow: hidden; color: #6388ac; background: #eef4fa; border-radius: 8px; text-decoration: none; }
 .work-cover-link { display: block; text-decoration: none; }
+.work-cover.has-screenshot { min-height: 0; padding: 14px; }
+.work-screenshot { display: block; width: 100%; height: auto; border-radius: 5px; box-shadow: 0 10px 25px rgba(58,91,122,.065); }
 .work-cover[data-cover='notes'] { background: #f0f5f9; }
 .work-cover[data-cover='archive'] { background: #ecf3f8; }
 .cover-window { width: 100%; max-width: 320px; min-height: 160px; overflow: hidden; background: #fdfefe; border: 1px solid #d4e0ec; border-radius: 6px; box-shadow: 0 10px 25px rgba(58,91,122,.065); }

@@ -1,4 +1,4 @@
-import { articles, works, messages } from './content.js';
+import { articles, works, messages } from './content.js?v=20261010-detective-ink';
 
 if (document.readyState === 'loading') {
   await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve, { once: true }));
@@ -31,10 +31,22 @@ function makeArticleRow(article) {
   return row;
 }
 
-function makeWorkCover(cover) {
+function makeWorkCover(cover, coverImage) {
   const container = element('div', 'work-cover');
   container.dataset.cover = cover;
   container.setAttribute('aria-hidden', 'true');
+  if (coverImage) {
+    container.classList.add('has-screenshot');
+    const image = element('img', 'work-screenshot');
+    image.src = coverImage;
+    image.alt = '';
+    image.width = 2560;
+    image.height = 1700;
+    image.loading = 'lazy';
+    image.decoding = 'async';
+    container.append(image);
+    return container;
+  }
   const window = element('div', 'cover-window');
   const toolbar = element('div', 'cover-toolbar');
   for (let index = 0; index < 3; index += 1) toolbar.append(element('i', 'cover-dot'));
@@ -53,16 +65,25 @@ function makeWorkCover(cover) {
 
 function makeWorkRow(work) {
   const row = element('article', 'work-row');
+  const href = work.url || `work.html?id=${encodeURIComponent(work.id)}`;
+  function configureLink(link) {
+    link.href = href;
+    link.setAttribute('aria-label', work.url ? `打开作品：${work.title}（新标签页）` : `查看作品：${work.title}`);
+    if (work.url) {
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.title = '在新标签页打开作品';
+    }
+  }
   const link = element('a', 'work-cover-link');
-  link.href = `work.html?id=${encodeURIComponent(work.id)}`;
-  link.setAttribute('aria-label', `查看作品概念：${work.title}`);
-  link.append(makeWorkCover(work.cover));
+  configureLink(link);
+  link.append(makeWorkCover(work.cover, work.coverImage));
   const copy = element('div', 'work-copy');
   const meta = element('div', 'work-meta');
-  meta.append(element('time', '', work.date), element('span', '', work.categoryName));
+  meta.append(element(work.status ? 'span' : 'time', '', work.status || work.date), element('span', '', work.categoryName));
   const title = element('h3', 'work-title');
   const titleLink = element('a', '', work.title);
-  titleLink.href = `work.html?id=${encodeURIComponent(work.id)}`;
+  configureLink(titleLink);
   title.append(titleLink);
   const excerpt = element('p', 'work-excerpt', work.excerpt);
   copy.append(meta, title, excerpt);
@@ -156,10 +177,18 @@ function renderDetail(items, type) {
     date.dateTime = item.dateISO;
     meta.append(date, element('span', 'category-label', item.categoryName));
   } else {
-    meta.append(element('time', '', item.date), element('span', '', item.categoryName), element('span', '', '概念示例'));
+    meta.append(element('time', '', item.date), element('span', '', item.categoryName), element('span', '', item.status || '概念示例'));
   }
   const content = $('[data-detail-content]', detail);
   item.paragraphs.forEach((text) => content.append(element('p', '', text)));
+  if (type === 'work' && item.url) {
+    const visit = element('a', 'text-link', '打开作品 ↗');
+    visit.href = item.url;
+    visit.target = '_blank';
+    visit.rel = 'noopener noreferrer';
+    visit.setAttribute('aria-label', `打开作品：${item.title}（新标签页）`);
+    content.append(visit);
+  }
   document.title = `${item.title} · 晴屿`;
 }
 

@@ -1,0 +1,27 @@
+[Unit]
+Description=Qingyu Waline guestbook (SQLite)
+After=network.target
+
+[Service]
+Type=simple
+User=qingyu-waline
+Group=qingyu-waline
+WorkingDirectory=/opt/qingyu-waline
+Environment=PATH=/opt/node-v22.23.3/bin:/usr/bin:/bin
+Environment=SITE_URL=https://linyouwei.top
+Environment=SERVER_URL=https://linyouwei.top/waline
+Environment=NODE_OPTIONS=--max-old-space-size=128
+ExecStart=/opt/node-v22.23.3/bin/node /opt/qingyu-waline/scripts/start-waline-production.mjs
+Restart=on-failure
+RestartSec=5
+MemoryHigh=192M
+MemoryMax=256M
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/qingyu-waline
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

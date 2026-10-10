@@ -155,7 +155,7 @@ ${toc}
         </div>
       </aside>
     </main>
-    <footer class="site-footer"><a class="footer-brand" href="../index.html">晴屿 <span>·</span> A QUIET PLACE</a><p>初版预览 · 内容为示例</p><a href="#top">回到顶部 ↑</a></footer>
+    <footer class="site-footer"><a class="footer-brand" href="../index.html">晴屿 <span>·</span> A QUIET PLACE</a><p>初版预览 · 内容为示例</p><a class="site-filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026096103号-1</a><a href="#top">回到顶部 ↑</a></footer>
   </div>
 </body>
 </html>

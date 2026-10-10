@@ -1,0 +1,9 @@
+# 推理助手展示插画
+
+生成方式：内置 imagegen，透明背景。
+参考：`../illustrations/meadow-static.png`、`../illustrations/coast-static.png`，仅用于笔触与配色。
+用途：替代个人主页及作品页上的真实截图；保留截图原稿。
+
+## 原始提示词
+
+Use case: stylized-concept. Asset: an original landscape illustration (approximately 3:2) for a personal blog's project showcase thumbnail. The two provided images are STYLE REFERENCES ONLY, not edit targets: match their very delicate blue pen drawing, pale blue watercolor, small coherent hand-rendered details and airy gentleness. Create a new still-life about a detective reasoning assistant: one elegant pale-blue open case folder, a few small ivory-white clue slips with delicate blue ruled marks and simple sketched evidence details, two slips joined by a thin gently curved blue thread, a modest magnifying glass resting across the lower corner and a small pen. Compose these as one calm, thoughtfully arranged connected group in a light three-quarter overhead view; the folder gives the group a clear silhouette. Fewer carefully drawn objects, clean separation, complete shapes with space around all sides. Fine blue ink contours, exquisite restrained crosshatching, subtly irregular watercolor pigment within the objects, very light washes. White paper areas remain white, all pigment desaturated powder blue and muted slate blue matching the reference illustrations. Quiet, soft, welcoming, light rather than busy. No landscape needed, no tree or sea. No software screenshot, no device, no browser frame, no UI, no text or letters, no fake writing, no logos, no watermark, no yellow, no black heavy outlines, no red threads, no dark shadows, no decorative stars, no cartoon face, no ornate frame. Genuinely transparent background and transparent outer negative space, no opaque paper rectangle or painted background. Keep the visual density and delicate craftsmanship of the references while making the objects readable at a small thumbnail size.

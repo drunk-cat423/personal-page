@@ -57,6 +57,13 @@ export const articles = [
 
 export const works = [
   {
+    id: 'detective-assistant', cover: 'detective', dateISO: '2026-10-10', date: '2026.10',
+    title: '推理助手', categoryName: '在线工具', status: '已上线 · 无需登录',
+    url: 'https://detective.linyouwei.top/', coverImage: 'assets/works/detective-ink-v1.png',
+    excerpt: '把线索、人物关系和时间线放在同一张便签画布上，为推理小说与剧情游戏整理思路。',
+    paragraphs: ['一个面向推理小说与剧情游戏的思路整理工具。用便签记录线索与人物，通过连线梳理关系，再用时间线回看事件的先后。', '项目已在线运行，无需登录即可进入档案首页。']
+  },
+  {
     id: 'quiet-window', cover: 'window', dateISO: '2026-09-20', date: '2026.09',
     title: '一扇可以慢慢打开的窗', categoryName: '网页概念', excerpt: '把一句文字、天气和一小块留白放在一起，做成安静的日常入口。',
     paragraphs: [

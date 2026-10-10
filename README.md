@@ -1,6 +1,10 @@
 # 晴屿 · 个人网页
 
-晴屿是一份蓝色钢笔淡水彩风格的个人网页初版。根目录是正式预览入口，首页依次呈现文章、作品、留言和关于；海岸单页作为独立设计预览保留。前端使用原生 HTML、CSS 和 JavaScript；Waline 客户端资源随项目本地提供，留言服务作为单独的本机进程运行。
+晴屿是一份蓝色钢笔淡水彩风格的个人网页。正式博客为 [https://linyouwei.top](https://linyouwei.top)，首页依次呈现文章、作品、留言和关于；海岸单页作为独立设计预览保留。前端使用原生 HTML、CSS 和 JavaScript；Waline 客户端资源随项目本地提供，正式留言服务由服务器上的独立 systemd 服务运行。
+
+“推理助手”入口为 [https://detective.linyouwei.top/](https://detective.linyouwei.top/)，无需登录。博客、留言 SQLite 和原项目 MySQL 相互独立；本机试用留言没有迁移到正式服务。实际部署、备份、更新与回滚见 [`docs/deployment.md`](docs/deployment.md)。
+
+正式留言已完成浏览器匿名回复、点赞与重启持久化验证，验收测试数据已清除；证书续期演练已通过。页脚沿用旧域名已有备案号：粤ICP备2026096103号-1。
 
 ## 本地运行
 
@@ -25,7 +29,7 @@ node scripts/start-waline-trial.mjs
 node server.mjs
 ```
 
-再访问 [http://127.0.0.1:4173/guestbook.html](http://127.0.0.1:4173/guestbook.html)。本机服务使用 SQLite 保存真实留言；未启动服务时留言页会提示未连接并提供重试。其他域名默认不会尝试连接本机服务，也不会回退到 Waline 公共演示地址。配置和差异说明见 [`docs/waline.md`](docs/waline.md)。
+再访问 [http://127.0.0.1:4173/guestbook.html](http://127.0.0.1:4173/guestbook.html)。本机服务使用 SQLite 保存真实留言；未启动服务时留言页会提示未连接并提供重试。正式站点自动连接同源 `/waline`；其他域名默认不会尝试连接本机服务，也不会回退到 Waline 公共演示地址。配置和差异说明见 [`docs/waline.md`](docs/waline.md)。
 
 ## 页面
 
@@ -47,13 +51,15 @@ node server.mjs
 
 文章、作品与留言页在真实内容准备前显示浅蓝骨架占位，完成后立即替换，不设置最低等待时间。页面模块异步下载，初始化前确认 DOM 已解析；远程字体样式不阻塞首屏，本地 CSS 和标题字体仍正常使用。插画先保留静态 PNG，在动图下载和解码完成、当前允许播放时才切换，下载失败则保持静态。
 
-文章、作品和公开示例留言集中在 [`content.js`](content.js)。修改时保留稳定且不重复的 `id`；文章使用 `category: 'tech' | 'life' | 'ramble'` 和 ISO 日期 `dateISO`，首页按日期从同一份数据取最新内容。作品目前是概念示例，不对应外部产品或仓库。
+文章、作品和公开示例留言集中在 [`content.js`](content.js)。修改时保留稳定且不重复的 `id`；文章使用 `category: 'tech' | 'life' | 'ramble'` 和 ISO 日期 `dateISO`，首页按日期从同一份数据取最新内容。作品可通过 `url` 链接到现有网站，在新标签页打开；`coverImage` 可提供真实界面截图，`status` 展示访问状态。未配置 `url` 的概念示例仍进入站内说明页。
+
+“推理助手”已加入首页预览与作品列表，入口为 `https://detective.linyouwei.top/`，封面为与博客同款的淡蓝色钢笔水彩插画，原截图保留。插画提示词见 `assets/works/detective-ink-v1.prompt.md`。作品的排序日期表示本次收录时间；访问无需登录。
 
 文章正文使用 `sections`，每节包含稳定的 `id`、`title` 与 `paragraphs` 数组。文章生成器需要 Node.js 22.7 或更新版本（本机使用 Node.js 24 验证）；更新文章后运行 `node scripts/build-articles.mjs`，重新生成 `posts/` 下的独立 HTML。标题、摘要、日期和正文直接保存在页面中，刷新或不执行 JavaScript 也能阅读。阅读页样式集中在 `article.css`，主站脚本仅负责导航、切换过渡及插画播放。
 
 文章目录在宽屏常驻正文右侧并随阅读位置高亮，窄屏改为正文上方的可折叠目录。首末文章的缺失前后入口保留淡色占位。篇末 `data-post-image-slot` 默认隐藏；以后可在文章数据添加 `illustration: { src, alt, motionSrc? }` 放图（资源路径相对 `posts/` 页面），当前六篇不显示插画。
 
-文章、作品和访客留言的早期示例身份不代表真实经历。正式留言页现接入 Waline：本机试用的已提交留言存入 SQLite 服务，客户端仍会在浏览器缓存昵称和未提交草稿；`variants/guestbook-local/index.html` 保留旧的纯本地演示版本作对照。正式服务地址默认为空，只在 `localhost` 或 `127.0.0.1` 自动连接本机试用服务；部署到其他域名需在 [`waline-config.js`](waline-config.js) 配置自己的服务地址。
+文章、作品和访客留言的早期示例身份不代表真实经历。正式留言页现接入 Waline：访客可匿名留言，已提交留言存入服务端 SQLite，客户端仍会在浏览器缓存昵称和未提交草稿；`variants/guestbook-local/index.html` 保留旧的纯本地演示版本作对照。[`waline-config.js`](waline-config.js) 的地址覆盖值保持为空，`linyouwei.top` 和 `www.linyouwei.top` 自动连接同源 `/waline`，`localhost` 或 `127.0.0.1` 自动连接本机 `:8360`。部署到其他域名时需配置自己的服务地址。
 
 ## 字体与插画
 
