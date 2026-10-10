@@ -101,18 +101,19 @@ function renderArticle(article, index) {
   return `<!doctype html>
 <html lang="zh-CN">
 <head>
+  <link rel="icon" type="image/svg+xml" href="../assets/branding/tree.svg?v=20261010-lyw-station">
   <meta charset="utf-8">
   <script src="../page-transitions.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fdfefe">
   <meta name="description" content="${description}">
-  <title>${title} · 晴屿</title>
+  <title>${title} · LYW Station</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css">
   <link rel="stylesheet" href="../article.css">
-  <script type="module" src="../site.js" async></script>
+  <script type="module" src="../site.js?v=20261010-lyw-station" async></script>
 </head>
 <body data-page="post">
   <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -155,7 +156,7 @@ ${toc}
         </div>
       </aside>
     </main>
-    <footer class="site-footer"><a class="footer-brand" href="../index.html">晴屿 <span>·</span> A QUIET PLACE</a><p>初版预览 · 内容为示例</p><a class="site-filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026096103号-1</a><a href="#top">回到顶部 ↑</a></footer>
+    <footer class="site-footer"><a class="footer-brand" href="../index.html">LYW Station</a><p>初版预览 · 内容为示例</p><a class="site-filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026096103号-1</a><a href="#top">回到顶部 ↑</a></footer>
   </div>
 </body>
 </html>

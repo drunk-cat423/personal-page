@@ -102,7 +102,7 @@ function makeMessageRow(message, isDemo = false) {
   row.append(meta, body);
   if (message.reply) {
     const reply = element('div', 'owner-reply');
-    reply.append(element('strong', 'reply-label', '晴屿 · 回复'), element('p', 'reply-body', message.reply));
+    reply.append(element('strong', 'reply-label', 'LYW Station · 回复'), element('p', 'reply-body', message.reply));
     row.append(reply);
   } else if (isDemo) {
     row.append(element('p', 'demo-label', '仅保存在此浏览器 · 尚未公开'));
@@ -136,7 +136,7 @@ function renderArticles() {
     list.setAttribute('aria-busy', 'false');
     list.classList.add('content-ready');
     count.textContent = `共 ${visible.length} 篇`;
-    document.title = `${activeCategory === 'all' ? '文章' : activeCategory === 'tech' ? '技术文章' : activeCategory === 'life' ? '生活文章' : '碎碎念文章'} · 晴屿`;
+    document.title = `${activeCategory === 'all' ? '文章' : activeCategory === 'tech' ? '技术文章' : activeCategory === 'life' ? '生活文章' : '碎碎念文章'} · LYW Station`;
     if (updateUrl) {
       const next = new URL(location.href);
       if (activeCategory === 'all') next.searchParams.delete('category');
@@ -166,7 +166,7 @@ function renderDetail(items, type) {
   if (!item) {
     detail.hidden = true;
     notFound.hidden = false;
-    document.title = `${type === 'article' ? '文章' : '作品'}未找到 · 晴屿`;
+    document.title = `${type === 'article' ? '文章' : '作品'}未找到 · LYW Station`;
     return;
   }
   $('[data-detail-title]', detail).textContent = item.title;
@@ -189,7 +189,7 @@ function renderDetail(items, type) {
     visit.setAttribute('aria-label', `打开作品：${item.title}（新标签页）`);
     content.append(visit);
   }
-  document.title = `${item.title} · 晴屿`;
+  document.title = `${item.title} · LYW Station`;
 }
 
 function openArticleLink() {
@@ -203,7 +203,7 @@ function openArticleLink() {
   }
   $('[data-article-opening]').hidden = true;
   $('[data-not-found]').hidden = false;
-  document.title = '文章未找到 · 晴屿';
+  document.title = '文章未找到 · LYW Station';
 }
 
 const GUESTBOOK_KEY = 'qingyu.guestbook-demo.v1';

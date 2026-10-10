@@ -1,6 +1,6 @@
-# 晴屿 · 个人网页
+# LYW Station · 个人网页
 
-晴屿是一份蓝色钢笔淡水彩风格的个人网页。正式博客为 [https://linyouwei.top](https://linyouwei.top)，首页依次呈现文章、作品、留言和关于；海岸单页作为独立设计预览保留。前端使用原生 HTML、CSS 和 JavaScript；Waline 客户端资源随项目本地提供，正式留言服务由服务器上的独立 systemd 服务运行。
+LYW Station是一份蓝色钢笔淡水彩风格的个人网页。正式博客为 [https://linyouwei.top](https://linyouwei.top)，首页依次呈现文章、作品、留言和关于；海岸单页作为独立设计预览保留。前端使用原生 HTML、CSS 和 JavaScript；Waline 客户端资源随项目本地提供，正式留言服务由服务器上的独立 systemd 服务运行。
 
 “推理助手”入口为 [https://detective.linyouwei.top/](https://detective.linyouwei.top/)，无需登录。博客、留言 SQLite 和原项目 MySQL 相互独立；本机试用留言没有迁移到正式服务。实际部署、备份、更新与回滚见 [`docs/deployment.md`](docs/deployment.md)。
 
