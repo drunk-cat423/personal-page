@@ -104,6 +104,13 @@
 
 再次压缩后：
 摘要 B → 更新的聊天记录 1 → 更新的聊天记录 2 → ……</code></pre>
+        <figure class="post-animation">
+          <video controls muted loop playsinline preload="metadata" width="900" height="460" poster="../assets/animations/pa-context-poster.webp" aria-label="增量积累 → 达到 85% → 压缩为前置摘要 → 继续积累。点击播放，容量数值为示意。">
+            <source src="../assets/animations/pa-context.mp4" type="video/mp4">
+            <a href="../assets/animations/pa-context.mp4">查看上下文积累与压缩动画</a>
+          </video>
+          <figcaption>增量积累 → 达到 85% → 压缩为前置摘要 → 继续积累。点击播放，容量数值为示意。</figcaption>
+        </figure>
         <p>摘要 B 会承接摘要 A 和这一阶段新增的交流。这样，较早的背景会随着摘要继续保留，最近正在发生的讨论则尽量维持原貌。至少在容量允许的时候，不必太早把一段还在展开的对话归纳成几句话。</p>
         <p>为了让这个切换可靠，整理开始时需要固定本次处理的消息范围。后台工作期间，新消息仍然正常接收，聊天也可以继续。只有整理成功，才一起更新摘要、画像和检查点；期间新来的消息继续留在检查点之后，作为下一阶段积累的开始。</p>
         <p>原始聊天记录也会保留。压缩改变的是之后默认使用的上下文，原文仍然可以追溯。如果发现摘要遗漏或误解了某个细节，还有机会回去确认。</p>

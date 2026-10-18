@@ -70,6 +70,16 @@ function validateArticles(items) {
       if (!section.title || !Array.isArray(section.paragraphs) || !section.paragraphs.length || section.paragraphs.some((paragraph) => typeof paragraph !== 'string')) {
         throw new Error(`Section content is incomplete in ${article.id}#${section.id}`);
       }
+      if (section.animation !== undefined) {
+        const animation = section.animation;
+        if (!animation || !Number.isInteger(animation.afterParagraph)
+          || animation.afterParagraph < 0 || animation.afterParagraph >= section.paragraphs.length
+          || typeof animation.src !== 'string' || !/^\.\.\/assets\/animations\/[a-z0-9-]+\.mp4$/.test(animation.src)
+          || typeof animation.poster !== 'string' || !/^\.\.\/assets\/animations\/[a-z0-9-]+\.webp$/.test(animation.poster)
+          || typeof animation.caption !== 'string' || !animation.caption.trim()) {
+          throw new Error(`Section animation is invalid in ${article.id}#${section.id}`);
+        }
+      }
     }
   }
 }
@@ -100,9 +110,20 @@ function renderSections(article) {
   const body = article.sections.map((section) => `
       <section class="post-section" aria-labelledby="${escapeHTML(section.id)}">
         <h2 id="${escapeHTML(section.id)}">${escapeHTML(section.title)}</h2>
-${section.paragraphs.map((paragraph) => `        ${renderParagraph(paragraph)}`).join('\n')}
+${section.paragraphs.map((paragraph, index) => `        ${renderParagraph(paragraph)}${section.animation?.afterParagraph === index ? renderAnimation(section.animation) : ''}`).join('\n')}
       </section>`).join('\n');
   return { toc, body };
+}
+
+function renderAnimation(animation) {
+  return `
+        <figure class="post-animation">
+          <video controls muted loop playsinline preload="metadata" width="900" height="460" poster="${escapeHTML(animation.poster)}" aria-label="${escapeHTML(animation.caption)}">
+            <source src="${escapeHTML(animation.src)}" type="video/mp4">
+            <a href="${escapeHTML(animation.src)}">查看上下文积累与压缩动画</a>
+          </video>
+          <figcaption>${escapeHTML(animation.caption)}</figcaption>
+        </figure>`;
 }
 
 function renderNeighbor(article, label, rel) {

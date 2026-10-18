@@ -227,6 +227,25 @@ body[data-page='post'] {
   margin-bottom: 0;
 }
 
+.post-animation {
+  margin: 0 0 1.25em;
+}
+
+.post-animation video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgb(83 125 171 / 13%);
+  border-radius: 6px;
+  background: #fbfdff;
+}
+
+.post-animation figcaption {
+  margin-top: 10px;
+  color: #748499;
+  font: 13px/1.8 var(--sans);
+}
+
 .post-illustration {
   width: min(100%, 460px);
   margin: 52px auto;

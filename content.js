@@ -49,6 +49,12 @@ export const articles = [
       {
         "id": "rolling-context",
         "title": "让对话持续积累，在接近容量时压缩接续",
+        "animation": {
+          "afterParagraph": 19,
+          "src": "../assets/animations/pa-context.mp4",
+          "poster": "../assets/animations/pa-context-poster.webp",
+          "caption": "增量积累 → 达到 85% → 压缩为前置摘要 → 继续积累。点击播放，容量数值为示意。"
+        },
         "paragraphs": [
           "身份和画像之外，还有一个问题，是在群聊里反复使用后才变得明显的：PA 有时候连自己刚才说过什么都不知道。",
           "当时默认加入上下文的主要是真人聊天记录，PA 自己的回复缺了一块。别人针对它刚才的回答继续讨论，它却可能接不上，因为在新一轮请求里，它根本没有看到自己的那段话。",
