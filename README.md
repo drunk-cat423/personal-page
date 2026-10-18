@@ -6,6 +6,28 @@ LYW Station是一份蓝色钢笔淡水彩风格的个人网页。正式博客为
 
 正式留言已完成浏览器匿名回复、点赞与重启持久化验证，验收测试数据已清除；证书续期演练已通过。页脚沿用旧域名已有备案号：粤ICP备2026096103号-1。
 
+## 博客制作 Skill
+
+[`skills/personal-blog`](skills/personal-blog/SKILL.md) 保存第一人称技术博客的写作、改稿、HTML/SVG 动画、页面验证与发布流程，以及本地发布打包脚本。仓库中的副本用于跨电脑同步，不属于网站静态发布资源。
+
+其他电脑拉取仓库后，在仓库根目录执行以下 PowerShell 命令，安装到当前 Codex 用户目录：
+
+```powershell
+$skillHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME '.codex' }
+$skillTarget = Join-Path $skillHome 'skills/personal-blog'
+New-Item -ItemType Directory -Force -Path $skillTarget | Out-Null
+Copy-Item -Path './skills/personal-blog/*' -Destination $skillTarget -Recurse -Force
+```
+
+macOS / Linux 可执行：
+
+```sh
+mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills/personal-blog"
+cp -R skills/personal-blog/. "${CODEX_HOME:-$HOME/.codex}/skills/personal-blog/"
+```
+
+若已对目标 Skill 做过本机修改，先比较后再同步。安装后在新会话中使用 `$personal-blog`，例如：“用 `$personal-blog`，把这次项目讨论整理成我的博客，先给我看看。”提交与部署仍以当次授权为准。
+
 ## 本地运行
 
 预览静态页面需要 Node.js 18 或更新版本。在项目根目录运行：

@@ -1,0 +1,4 @@
+interface:
+  display_name: "个人技术博客工作流"
+  short_description: "把真实项目讨论写成第一人称博客，并按需完成矢量动画、页面验证和发布"
+  default_prompt: "使用 $personal-blog，把这次项目讨论整理成我的第一人称博客，并按本次要求完成改稿、页面集成或发布。"
