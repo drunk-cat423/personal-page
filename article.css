@@ -231,7 +231,7 @@ body[data-page='post'] {
   margin: 0 0 1.25em;
 }
 
-.post-animation video {
+.post-animation svg {
   display: block;
   width: 100%;
   height: auto;
@@ -240,10 +240,45 @@ body[data-page='post'] {
   background: #fbfdff;
 }
 
+.post-animation svg text {
+  font-family: system-ui, 'Microsoft YaHei', sans-serif;
+}
+
 .post-animation figcaption {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
   margin-top: 10px;
   color: #748499;
   font: 13px/1.8 var(--sans);
+}
+
+.post-animation-controls {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.post-animation-controls button {
+  min-height: 36px;
+  padding: 4px 12px;
+  border: 1px solid #d5e2ec;
+  border-radius: 5px;
+  background: #f8fbfd;
+  color: #537dab;
+  font: inherit;
+  cursor: pointer;
+}
+
+.post-animation-controls button[hidden] {
+  display: none;
+}
+
+.post-animation-controls button:focus-visible {
+  outline: 2px solid #537dab;
+  outline-offset: 3px;
 }
 
 .post-illustration {

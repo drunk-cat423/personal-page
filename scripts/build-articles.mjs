@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { articles } from '../content.js';
@@ -74,8 +75,7 @@ function validateArticles(items) {
         const animation = section.animation;
         if (!animation || !Number.isInteger(animation.afterParagraph)
           || animation.afterParagraph < 0 || animation.afterParagraph >= section.paragraphs.length
-          || typeof animation.src !== 'string' || !/^\.\.\/assets\/animations\/[a-z0-9-]+\.mp4$/.test(animation.src)
-          || typeof animation.poster !== 'string' || !/^\.\.\/assets\/animations\/[a-z0-9-]+\.webp$/.test(animation.poster)
+          || typeof animation.src !== 'string' || !/^\.\.\/assets\/animations\/[a-z0-9-]+\.svg$/.test(animation.src)
           || typeof animation.caption !== 'string' || !animation.caption.trim()) {
           throw new Error(`Section animation is invalid in ${article.id}#${section.id}`);
         }
@@ -116,13 +116,17 @@ ${section.paragraphs.map((paragraph, index) => `        ${renderParagraph(paragr
 }
 
 function renderAnimation(animation) {
+  const svg = readFileSync(path.resolve(postsDir, animation.src), 'utf8').trim();
   return `
-        <figure class="post-animation">
-          <video controls muted loop playsinline preload="metadata" width="900" height="460" poster="${escapeHTML(animation.poster)}" aria-label="${escapeHTML(animation.caption)}">
-            <source src="${escapeHTML(animation.src)}" type="video/mp4">
-            <a href="${escapeHTML(animation.src)}">查看上下文积累与压缩动画</a>
-          </video>
-          <figcaption>${escapeHTML(animation.caption)}</figcaption>
+        <figure class="post-animation" data-context-animation>
+          ${svg}
+          <figcaption>
+            <span>${escapeHTML(animation.caption)}</span>
+            <span class="post-animation-controls">
+              <button type="button" data-animation-toggle hidden>暂停</button>
+              <button type="button" data-animation-replay hidden>重播</button>
+            </span>
+          </figcaption>
         </figure>`;
 }
 
@@ -146,6 +150,8 @@ function renderArticle(article, index) {
   const title = escapeHTML(article.title);
   const description = escapeHTML(article.excerpt);
   const categoryName = escapeHTML(article.categoryName);
+  const animationScript = article.sections.some((section) => section.animation)
+    ? '  <script type="module" src="../context-animation.js?v=20261018-svg"></script>\n' : '';
 
   return `<!doctype html>
 <html lang="zh-CN">
@@ -161,9 +167,9 @@ function renderArticle(article, index) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
-  <link rel="stylesheet" href="../article.css?v=20261010-pose-player">
+  <link rel="stylesheet" href="../article.css?v=20261018-context-svg">
   <script type="module" src="../site.js?v=20261010-avatar-icons" async></script>
-</head>
+${animationScript}</head>
 <body data-page="post">
   <a class="skip-link" href="#main-content">跳到主要内容</a>
   <div class="site-shell">

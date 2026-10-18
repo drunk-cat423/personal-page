@@ -1,0 +1,48 @@
+<svg id="pa-context-stage" viewBox="332 163 900 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" width="900" height="460">
+<title id="title">增量积累，按容量压缩接续</title>
+<desc id="desc">聊天逐条追加到上下文。占用达到百分之八十五时，固定历史快照并压缩成摘要。摘要位于聊天记录前面，新消息从检查点之后继续积累。原始记录保留。</desc>
+<defs>
+  <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#8eafc3" opacity=".15"></circle></pattern>
+  <filter id="shadow" x="-15%" y="-15%" width="130%" height="140%"><feDropShadow dx="0" dy="7" stdDeviation="12" flood-color="#52718a" flood-opacity=".07"></feDropShadow></filter>
+  <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#739bb8"></stop><stop offset="1" stop-color="#477798"></stop></linearGradient>
+</defs>
+<rect width="1280" height="720" fill="#fbfdff"></rect>
+<rect width="1280" height="720" fill="url(#grid)"></rect>
+
+
+
+
+
+
+
+
+
+
+
+
+<rect x="340" y="171" width="600" height="441" rx="16" fill="white" stroke="#d5e2ec" filter="url(#shadow)"></rect>
+<rect x="340" y="171" width="600" height="55" rx="16" fill="#f1f6fa"></rect>
+<rect x="340" y="201" width="600" height="25" fill="#f1f6fa"></rect>
+<circle cx="362" cy="198" r="4" fill="#a9c0d1"></circle><circle cx="376" cy="198" r="4" fill="#c3d4e0"></circle><circle cx="390" cy="198" r="4" fill="#d5e1e9"></circle>
+<text x="410" y="203" fill="#54758e" font-size="13">本轮发给模型的聊天资料</text>
+<text id="window-label" x="920" y="203" fill="#8ba0af" font-size="11" text-anchor="end">摘要在前 · 新消息继续追加</text>
+<g id="history" style="opacity: 0;"><g transform="translate(20,0) scale(0.93)" style="opacity: 0;"><rect x="358" y="244" width="564" height="30" rx="6" fill="#f8fafc"></rect><circle cx="374" cy="259" r="3" fill="#b1bec8"></circle><text x="386" y="264" font-size="11" fill="#7290a5">群友 A</text><text x="448" y="264" font-size="12" fill="#3f6079">上下文缓存是怎么工作的？</text><text x="907" y="264" font-size="10" fill="#9aafbd" text-anchor="end">01</text></g><g transform="translate(20,-33) scale(0.93)" style="opacity: 0;"><rect x="358" y="281" width="564" height="30" rx="6" fill="#f0f6fa"></rect><circle cx="374" cy="296" r="3" fill="#6c99b7"></circle><text x="386" y="301" font-size="11" fill="#7290a5">PA</text><text x="448" y="301" font-size="12" fill="#3f6079">我们先从前缀相同的部分说起。</text><text x="907" y="301" font-size="10" fill="#9aafbd" text-anchor="end">02</text></g><g transform="translate(20,-66) scale(0.93)" style="opacity: 0;"><rect x="358" y="318" width="564" height="30" rx="6" fill="#f8fafc"></rect><circle cx="374" cy="333" r="3" fill="#b1bec8"></circle><text x="386" y="338" font-size="11" fill="#7290a5">群友 A</text><text x="448" y="338" font-size="12" fill="#3f6079">那后面追加的消息呢？</text><text x="907" y="338" font-size="10" fill="#9aafbd" text-anchor="end">03</text></g><g transform="translate(20,-99) scale(0.93)" style="opacity: 0;"><rect x="358" y="355" width="564" height="30" rx="6" fill="#f0f6fa"></rect><circle cx="374" cy="370" r="3" fill="#6c99b7"></circle><text x="386" y="375" font-size="11" fill="#7290a5">PA</text><text x="448" y="375" font-size="12" fill="#3f6079">新消息继续放在已有历史之后。</text><text x="907" y="375" font-size="10" fill="#9aafbd" text-anchor="end">04</text></g><g transform="translate(20,-132) scale(0.93)" style="opacity: 0;"><rect x="358" y="392" width="564" height="30" rx="6" fill="#f8fafc"></rect><circle cx="374" cy="407" r="3" fill="#b1bec8"></circle><text x="386" y="412" font-size="11" fill="#7290a5">群友 B</text><text x="448" y="412" font-size="12" fill="#3f6079">所以你也会记得自己说过什么？</text><text x="907" y="412" font-size="10" fill="#9aafbd" text-anchor="end">05</text></g><g transform="translate(20,-165) scale(0.93)" style="opacity: 0;"><rect x="358" y="429" width="564" height="30" rx="6" fill="#f0f6fa"></rect><circle cx="374" cy="444" r="3" fill="#6c99b7"></circle><text x="386" y="449" font-size="11" fill="#7290a5">PA</text><text x="448" y="449" font-size="12" fill="#3f6079">已确认送达的回复也会进入历史。</text><text x="907" y="449" font-size="10" fill="#9aafbd" text-anchor="end">06</text></g><g transform="translate(20,-198) scale(0.93)" style="opacity: 0;"><rect x="358" y="466" width="564" height="30" rx="6" fill="#f8fafc"></rect><circle cx="374" cy="481" r="3" fill="#b1bec8"></circle><text x="386" y="486" font-size="11" fill="#7290a5">群友 A</text><text x="448" y="486" font-size="12" fill="#3f6079">先保留这段讨论，继续往下推。</text><text x="907" y="486" font-size="10" fill="#9aafbd" text-anchor="end">07</text></g><g transform="translate(20,-231) scale(0.93)" style="opacity: 0;"><rect x="358" y="503" width="564" height="30" rx="6" fill="#f0f6fa"></rect><circle cx="374" cy="518" r="3" fill="#6c99b7"></circle><text x="386" y="523" font-size="11" fill="#7290a5">PA</text><text x="448" y="523" font-size="12" fill="#3f6079">前面的解释仍然作为背景。</text><text x="907" y="523" font-size="10" fill="#9aafbd" text-anchor="end">08</text></g><g transform="translate(20,-264) scale(0.93)" style="opacity: 0;"><rect x="358" y="540" width="564" height="30" rx="6" fill="#f8fafc"></rect><circle cx="374" cy="555" r="3" fill="#b1bec8"></circle><text x="386" y="560" font-size="11" fill="#7290a5">群友 B</text><text x="448" y="560" font-size="12" fill="#3f6079">历史越来越长，什么时候整理？</text><text x="907" y="560" font-size="10" fill="#9aafbd" text-anchor="end">09</text></g></g>
+<g id="snapshot" style="opacity: 0;"><rect x="351" y="236" width="578" height="340" rx="10" fill="none" stroke="#c8a174" stroke-dasharray="5 5"></rect><rect x="725" y="574" width="195" height="22" rx="11" fill="#fcf5eb"></rect><text x="822" y="589" text-anchor="middle" font-size="10" fill="#a58256">固定快照：消息 01—09</text></g>
+<g id="summary" transform="translate(0,0)" style="opacity: 1;"><rect x="358" y="244" width="564" height="90" rx="9" fill="#eaf3fa" stroke="#a5c4da"></rect><path d="M374 263h10m-5-5v10" stroke="#6691ae" stroke-width="1.5"></path><text x="393" y="267" font-size="12" fill="#446f8f" font-weight="600">压缩摘要 A</text><rect x="815" y="253" width="92" height="21" rx="10" fill="#d9e9f5"></rect><text x="861" y="267" text-anchor="middle" font-size="10" fill="#6187a1">固定在历史前面</text><text x="374" y="294" font-size="12" fill="#51758e"><tspan x="374" dy="0">已讨论前缀缓存与消息追加；真人发言和已送达的 PA 回复均保留。</tspan><tspan x="374" dy="22">接下来继续讨论压缩后的上下文如何接续。</tspan></text></g>
+<g id="new-history"><g transform="translate(0,0)" style="opacity: 1;"><rect x="358" y="349" width="564" height="30" rx="6" fill="#f8fafc"></rect><circle cx="374" cy="364" r="3" fill="#b1bec8"></circle><text x="386" y="369" font-size="11" fill="#7290a5">群友 A</text><text x="448" y="369" font-size="12" fill="#3f6079">那压缩后，我们接着讨论。</text><text x="907" y="369" font-size="10" fill="#9aafbd" text-anchor="end">10</text></g><g transform="translate(0,12)" style="opacity: 0;"><rect x="358" y="386" width="564" height="30" rx="6" fill="#f0f6fa"></rect><circle cx="374" cy="401" r="3" fill="#6c99b7"></circle><text x="386" y="406" font-size="11" fill="#7290a5">PA</text><text x="448" y="406" font-size="12" fill="#3f6079">已有背景看摘要，新消息继续追加。</text><text x="907" y="406" font-size="10" fill="#9aafbd" text-anchor="end">11</text></g><g transform="translate(0,12)" style="opacity: 0;"><rect x="358" y="423" width="564" height="30" rx="6" fill="#f8fafc"></rect><circle cx="374" cy="438" r="3" fill="#b1bec8"></circle><text x="386" y="443" font-size="11" fill="#7290a5">群友 B</text><text x="448" y="443" font-size="12" fill="#3f6079">这次讨论还会接着积累吗？</text><text x="907" y="443" font-size="10" fill="#9aafbd" text-anchor="end">12</text></g><g transform="translate(0,12)" style="opacity: 0;"><rect x="358" y="460" width="564" height="30" rx="6" fill="#f0f6fa"></rect><circle cx="374" cy="475" r="3" fill="#6c99b7"></circle><text x="386" y="480" font-size="11" fill="#7290a5">PA</text><text x="448" y="480" font-size="12" fill="#3f6079">会，直到下一次接近容量边界。</text><text x="907" y="480" font-size="10" fill="#9aafbd" text-anchor="end">13</text></g><g transform="translate(0,12)" style="opacity: 0;"><rect x="358" y="497" width="564" height="30" rx="6" fill="#f8fafc"></rect><circle cx="374" cy="512" r="3" fill="#b1bec8"></circle><text x="386" y="517" font-size="11" fill="#7290a5">群友 A</text><text x="448" y="517" font-size="12" fill="#3f6079">好，继续看下一个问题。</text><text x="907" y="517" font-size="10" fill="#9aafbd" text-anchor="end">14</text></g><g transform="translate(0,12)" style="opacity: 0;"><rect x="358" y="534" width="564" height="30" rx="6" fill="#f0f6fa"></rect><circle cx="374" cy="549" r="3" fill="#6c99b7"></circle><text x="386" y="554" font-size="11" fill="#7290a5">PA</text><text x="448" y="554" font-size="12" fill="#3f6079">带着已有背景，继续这一轮交流。</text><text x="907" y="554" font-size="10" fill="#9aafbd" text-anchor="end">15</text></g></g>
+
+<text x="988" y="188" font-size="12" fill="#7992a4">上下文占用</text>
+<text id="usage-number" x="984" y="251" font-size="53" font-weight="300" fill="#477798">24<tspan font-size="22">%</tspan></text>
+<text x="988" y="277" font-size="11" fill="#8ca1af">容量与预留合计 · 示意</text>
+<rect x="990" y="311" width="30" height="228" rx="15" fill="#eaf1f6"></rect>
+<rect id="usage-bar" x="990" y="484.28" width="30" height="54.72" rx="15" fill="url(#ink)"></rect>
+<path d="M980 345.2H1030" stroke="#c29359" stroke-width="1.5" stroke-dasharray="3 4"></path>
+<text x="1041" y="343" font-size="14" fill="#ad7e43">85%</text>
+<text x="1041" y="363" font-size="11" fill="#a98f70">开始压缩</text>
+<text x="988" y="563" font-size="11" fill="#8ca1af">达到容量边界时再整理</text>
+
+
+
+
+
+</svg>
