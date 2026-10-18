@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <link rel="icon" type="image/svg+xml" href="../assets/branding/tree.svg?v=20261010-lyw-station">
+  <meta charset="utf-8">
+  <script src="../page-transitions.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fdfefe">
+  <meta name="description" content="从群聊中的串人和断片开始，记录 PA 的身份、画像，以及逐轮积累、按容量压缩接续的上下文设计。">
+  <title>让 PA 记住聊天，也记清是谁说的 · LYW Station</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
+  <link rel="stylesheet" href="../article.css?v=20261010-pose-player">
+  <script type="module" src="../site.js?v=20261010-avatar-icons" async></script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <div class="site-shell">
+    <header class="site-header" id="top">
+      <a class="brand" href="../index.html" aria-label="回到主页"><span class="home-label">主页</span><svg class="home-ink" viewBox="0 0 60 12" aria-hidden="true" focusable="false"><path d="M3 5C17 3 38 7 56 4" /><path class="home-ink-echo" d="M9 9C25 7 40 10 51 8" /></svg></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span class="nav-toggle-label">打开菜单</span><span aria-hidden="true">☰</span></button>
+      <nav class="main-nav" id="site-nav" aria-label="主要导航"><a href="../articles.html" aria-current="page">文章</a><a href="../works.html">作品</a><a href="../guestbook.html">留言</a><a href="../about.html">关于</a></nav>
+    </header>
+    <main id="main-content" class="post-page">
+      <article class="post-article">
+        <a class="post-back" href="../articles.html">← 返回文章列表</a>
+        <header class="post-header">
+          <h1 class="post-title">让 PA 记住聊天，也记清是谁说的</h1>
+          <p class="post-excerpt">从群聊中的串人和断片开始，记录 PA 的身份、画像，以及逐轮积累、按容量压缩接续的上下文设计。</p>
+          <div class="post-meta"><span class="post-category">技术</span><time datetime="2026-10-18">2026.10.18</time><span>约 16 分钟</span></div>
+        </header>
+        <details class="post-toc post-toc--mobile">
+          <summary>这一页的目录</summary>
+          <nav aria-label="文章目录"><ol>
+<li><a href="#identity-profiles">分清每个人，再保存各自的画像</a></li>
+<li><a href="#tool-loop">让模型判断，让程序确认操作</a></li>
+<li><a href="#rolling-context">让对话持续积累，在接近容量时压缩接续</a></li>
+<li><a href="#summary-topics">摘要负责接续，Topic 负责查找</a></li>
+<li><a href="#prefix-cache">稳定的历史放前面，变化的资料放后面</a></li>
+<li><a href="#self-profile">也给 PA 留下一份自己的画像</a></li>
+          </ol></nav>
+        </details>
+        <div class="post-content">
+        <p>最近，我在做一个叫 PA 的项目，Personal Agent。</p>
+        <p>它基于 TypeScript 和 Pi，目前主要通过 QQ 群聊使用。我希望它能陪我讨论技术问题，也能参与一些普通聊天。随着交流变多，它应该逐渐积累背景，知道我们之前讨论过什么、某些简称是什么意思，以及不同的人各自关心什么。</p>
+        <p>最初想到这些需求时，很容易把它们统称为“加一个记忆系统”。真正放进群里用起来，才发现这几个字下面藏着不少事情。</p>
+      <section class="post-section" aria-labelledby="identity-profiles">
+        <h2 id="identity-profiles">分清每个人，再保存各自的画像</h2>
+        <p>群聊里，有人提问，有人接话，有人开玩笑，话题也经常同时展开。</p>
+        <p>PA 曾经出现过一种很明显的问题：一个群友说过的事情，过了一会儿，它会当成另一个人的经历继续聊。单看回复，语句通常很通顺，甚至还能接上前面的细节，但人已经认错了。</p>
+        <p>这比忘记一句话更让人出戏。也让我意识到，在考虑如何积累一个人的画像之前，得先保证每条信息都能对应到正确的人。</p>
+        <p>所以，每条消息都需要保留发送者的稳定标识，不能只剩下昵称和正文。昵称可以变，也可能重复；“是谁说的”需要由程序保存。</p>
+        <p>这里还涉及同一个人在不同场景中的身份。一个人在群聊里和私聊里，平台给出的标识未必能直接对应。我保留了房间内的 <code>actor_id</code>，再通过明确绑定的 <code>person_id</code> 汇总同一个人。</p>
+        <p>可以把前者理解为“这个人在这个房间里的身份”，后者则是经过确认的“这个人”。</p>
+        <p>按照我对 PA 的设想，同一个人的画像可以在已绑定的群聊和私聊中共同使用。原始聊天记录仍然留在各自房间，身份共享也不会顺便带来管理权限。这些关系需要程序确认，不能让模型看着两个相似的昵称自行认亲。</p>
+        <p>有了这层对应关系，接下来才是怎样保存和使用画像。</p>
+        <p>我对用户画像的期待其实比较朴素：以后聊到相关内容时，能少解释一点背景。但早期的使用体验有些奇怪。有人让 PA 记住一件事，它会先询问应该归到哪种分类；有时候，它又会把画像里的条目直接念出来，像在展示一份内部档案。</p>
+        <p>于是，我把个人画像的结构简化为两部分：<strong>已归档和未归档</strong>。</p>
+        <p>明确提出的补充或纠正，先作为未归档内容保存，下一轮就可以使用；之后整理对话时，再结合已有内容合并、修正，形成新的归档画像。</p>
+        <p>这样，用户不必先理解系统的分类方式。说“以后技术方案不可行时，直接反驳我”，PA 应该理解这个要求，在保存成功后简短确认，之后真的在讨论中体现出来。</p>
+        <p>读取画像时，也继续沿用明确的身份边界：目前只注入当前提问者，以及本条消息真实 @ 到的人的画像。历史里出现过某个人、正文提到了一个名字，都不会自动把那个人的资料带进来。</p>
+        <p>从消息归属，到画像保存，再到每次回答时读取谁的资料，这几步需要连起来考虑。我希望 PA 能逐渐熟悉每个人，同时分清这些认识各自属于谁，并在交流中自然地使用它们。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="tool-loop">
+        <h2 id="tool-loop">让模型判断，让程序确认操作</h2>
+        <p>早期实现里，我曾试图通过程序规则判断很多语义情况：这是不是续问，需不需要历史，有没有要求更新画像。</p>
+        <p>用起来之后，这条路越来越别扭。自然语言稍微换一种说法，规则就可能漏掉；不断加规则，也很难覆盖真实群聊的表达。</p>
+        <p>既然底层已经用了 Pi，就应该把它的工具循环利用起来。</p>
+        <p>现在，每轮渠道请求会先通过 <code>prepare_turn</code>，由模型判断当前意图、表达方式，以及是否需要保存画像等更新。程序检查目标、权限和数据结构，完成保存后返回回执，模型再据此回答。需要进一步查历史或搜索资料时，再继续调用相应工具。</p>
+        <p>工具的执行结果会回到模型上下文里，所以“我记住了”应当对应一次已经成功的保存。</p>
+        <p>历史读取也接入了工具。目前使用 SQLite 的 FTS5 和 BM25 做关键词检索，没有额外部署向量服务。</p>
+        <p>这套检索有明确的局限：表达换得比较远时，关键词未必能找回来。但现阶段，我更想先把来源、房间范围和读取流程做好，再根据使用效果决定是否需要更复杂的检索方式。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="rolling-context">
+        <h2 id="rolling-context">让对话持续积累，在接近容量时压缩接续</h2>
+        <p>身份和画像之外，还有一个问题，是在群聊里反复使用后才变得明显的：PA 有时候连自己刚才说过什么都不知道。</p>
+        <p>当时默认加入上下文的主要是真人聊天记录，PA 自己的回复缺了一块。别人针对它刚才的回答继续讨论，它却可能接不上，因为在新一轮请求里，它根本没有看到自己的那段话。</p>
+        <p>顺着这个问题往下看，我也开始重新考虑“只取最近几条聊天”的做法。</p>
+        <p>作为一个希望长期使用的学习和对话助手，如果每轮只看到一个很短的片段，交流很容易断。技术问题尤其如此：前面先解释概念，后面讨论机制，再根据机制提出一个假设。到了最后，真正重要的背景可能早就被挤出了“最近几条”。</p>
+        <p>为了弥补断裂，再用规则猜测哪些历史值得加入，又回到了不断补规则的老路。</p>
+        <p>所以，后来我把群聊和私聊统一成了一种结构：</p>
+        <p><strong>最近一次压缩摘要，加上摘要之后持续积累的完整聊天记录。</strong></p>
+        <p>在两次压缩之间，每轮保留之前已经积累的聊天，再把新出现的消息追加到后面。这里既包括真人消息，也包括 PA 已经确认送达的回复。没有成功发出的内容，不会被当成大家已经看过的对话。</p>
+        <p>比如，第一轮讨论一个概念，第二轮针对解释追问，第三轮提出一个新的可能性。第三轮请求里，前两轮的交流仍然在，包括 PA 自己给出的解释。</p>
+        <p>对我来说，这很重要。我经常是在对话中逐步想清楚一个问题，很少一开始就把所有前提和问题都写完整。如果 PA 能看到这个过程，就更有机会理解：我现在是在追问哪里，又修改了前面的哪个假设。</p>
+        <p>这里的“增量添加”，指的是我们自己维护的上下文持续增长。实际调用模型时，仍然会提交组装好的完整请求，不能假定接口已经替我们永久记住了前面的话。</p>
+        <p>每轮请求也有自己的历史边界。处理这条问题时，只使用它到达之前已经可见的历史，当前问题单独放置；之后到达的新消息，留给后续请求。较晚才确认送达的回复，也按照可见顺序追加。</p>
+        <p>这样，某一轮模型看到的资料是确定的，不会因为处理期间又来了几条消息，输入就悄悄变成另一段对话。</p>
+        <p>保留完整历史，当然也意味着其中会有闲聊和无关话题。PA 仍然需要围绕这次提问作答。历史提供的是理解问题的背景，不需要每次都拿出来复述。</p>
+        <p>接下来需要解决的，就是这段历史不断增长之后，什么时候整理，以及整理完如何继续。</p>
+        <p>最初，我采用过一个很直观的条件：群聊达到五十条消息，或者私聊五十轮，就整理一次。后来想想，这个数字和实际容量没有直接关系。五十句短消息与五十段长讨论，长度可以差很多。既然已经有较大的上下文窗口，就没必要仅因为消息数到了一个整数而压缩。</p>
+        <p>现在取消了数量触发，只保留容量条件：<strong>最终组装的上下文连同必要预留，接近模型窗口的 85% 时进行压缩。</strong></p>
+        <p>压缩时，会把上一份摘要和这次新增的聊天一起交给整理流程，生成新的 <code>continuationSummary</code>。新摘要放在聊天资料部分的最前面，后面从本次压缩检查点之后重新积累消息。</p>
+        <p>整个过程可以理解为：</p>
+        <pre><code>刚开始：
+聊天记录 1 → 聊天记录 2 → …… → 聊天记录 N
+
+第一次压缩后：
+摘要 A → 新聊天记录 1 → 新聊天记录 2 → ……
+
+再次压缩后：
+摘要 B → 更新的聊天记录 1 → 更新的聊天记录 2 → ……</code></pre>
+        <p>摘要 B 会承接摘要 A 和这一阶段新增的交流。这样，较早的背景会随着摘要继续保留，最近正在发生的讨论则尽量维持原貌。至少在容量允许的时候，不必太早把一段还在展开的对话归纳成几句话。</p>
+        <p>为了让这个切换可靠，整理开始时需要固定本次处理的消息范围。后台工作期间，新消息仍然正常接收，聊天也可以继续。只有整理成功，才一起更新摘要、画像和检查点；期间新来的消息继续留在检查点之后，作为下一阶段积累的开始。</p>
+        <p>原始聊天记录也会保留。压缩改变的是之后默认使用的上下文，原文仍然可以追溯。如果发现摘要遗漏或误解了某个细节，还有机会回去确认。</p>
+        <p>这也是这次调整中，我最想保留下来的一个设计：让对话在容量允许时充分展开，接近边界时再整理成背景，然后带着这份背景继续聊下去。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="summary-topics">
+        <h2 id="summary-topics">摘要负责接续，Topic 负责查找</h2>
+        <p>这里还有一个容易混在一起的概念：既然已经生成摘要，为什么还要保留 Topic？</p>
+        <p>因为它们承担的用途不太一样。</p>
+        <p><code>continuationSummary</code> 是每轮默认带着的背景，需要帮助 PA 接着当前的交流往下走。</p>
+        <p>Topic 保存具体讨论，供以后检索。某个技术问题可能已经聊完，暂时没有必要一直放在默认上下文里，但过几天重新提起时，应该还能找到相关内容。</p>
+        <p>我不太指望一份摘要把所有事情都保存得同样完整。随着交流变长，它必然需要取舍。所以，一边用摘要维持连续性，一边保留可检索的话题和原文，对目前的项目来说比较合适。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="prefix-cache">
+        <h2 id="prefix-cache">稳定的历史放前面，变化的资料放后面</h2>
+        <p>采用逐轮追加的方式后，上下文的位置也值得一起调整。</p>
+        <p>目前，比较稳定的系统说明和工具定义放在前面，接着是最近一次压缩摘要，以及持续追加的消息流。当前身份、画像、时间和本次问题等动态内容，放在后面。</p>
+        <p>这样安排，一方面让不同资料各自承担清楚的作用；另一方面，也希望尽量保持请求前缀稳定，利用模型服务的前缀缓存。</p>
+        <p>在两次压缩之间，之前的摘要和历史尽量保持不动，新消息往后追加。如果把每轮都变的时间或人物资料插在它们前面，就更容易提前打断相同的前缀。</p>
+        <p>压缩发生后，摘要和消息段会重新组织，前缀自然也会变化。这是为了控制容量所做的一次切换，之后再开始下一阶段的积累。</p>
+        <p>当然，结构适合缓存，不代表每次一定命中，仍然要看接口返回的实际用量。</p>
+        <p>而且，<strong>缓存命中会影响调用成本，但命中的历史仍然占上下文窗口。</strong> 判断是否接近容量时，不能只统计没有命中缓存的输入。</p>
+        <p>实际排查时，还碰到了估算与真实用量差距较大的问题。有一次请求，模型返回的实际输入大约是 17.6 万 Token，而原先的估算已经认为窗口占用了六成以上。</p>
+        <p>后来排查发现，前期为了方便，用 UTF-8 字节数对 Token 数量做了保守估计，再叠加为回答、工具调用和安全边界预留的空间，最终估算与实际用量之间出现了较大的偏差。</p>
+        <p>现在会利用成功请求返回的真实 Token 用量进行校准。相同历史尽量沿用已有实测基础，新增内容仍然保守估计，并保留必要余量。</p>
+        <p>事前估算始终会有误差，但至少应该尽量接近真正的使用情况。否则，设计上说接近容量才压缩，实际上却早早触发，长上下文的价值也就没有发挥出来。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="self-profile">
+        <h2 id="self-profile">也给 PA 留下一份自己的画像</h2>
+        <p>除了记住群友，PA 也有一份比较轻量的自身画像，记录名称、定位、表达风格和倾向。</p>
+        <p>我没有一开始就给它填满鲜明的人设，更希望它能在长期交流中逐步形成比较稳定的表达方式。允许接入的群友都可以提出明确建议，保存后先进入待整理部分，之后再随对话整理合并。</p>
+        <p>这份画像只负责表达和定位。工具权限、身份绑定、群规则等内容，仍然由各自的机制管理。</p>
+        <p>我想让 PA 慢慢积累的，是能够继续聊下去的背景：知道刚才讨论到了哪里，分清是谁说过什么，接受后来明确的纠正，也能把答应保存的事情真正留下来。</p>
+        <p>目前，我已经开始频繁使用群里的 bot，但用得越多，也越能感受到一些问题。比如，它的回复经常很长。很多事情其实可以先说一点，等对方有兴趣再展开，没有必要一次性把所有信息都铺出来。过于完整的回答，有时候反而会带来阅读压力，甚至让人觉得不知道该从哪里接话。</p>
+        <p>另一个问题是主动性。现在仍然需要有人 @，它才会回答。但我期望它成为一个长期伙伴，总不能每次都等着被叫到才开口。</p>
+        <p>可是，什么时候值得主动说一句，什么时候应该安静待着，也很难拿捏。太随便、太频繁地插话，很容易打断群里原本的交流。我希望它能逐渐找到这种分寸：有自己的存在感，也给别人留下空间。</p>
+      </section>
+        </div>
+        <figure class="post-illustration" data-post-image-slot hidden></figure>
+        <nav class="post-pagination" aria-label="前后文章">
+          <div class="post-neighbor post-neighbor--prev post-neighbor--empty"><span>上一篇</span><strong>暂无上一篇</strong></div>
+          <a class="post-list-link" href="../articles.html"><svg class="post-list-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7 5 3 9l4 4M3.5 9H12c4.5 0 5 3.5 3 6" /></svg><span class="post-list-label">返回文章列表<svg class="post-list-ink" viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 5C30 3 68 7 116 4" /><path class="post-list-echo" d="M12 9C43 7 77 10 106 8" /></svg></span></a>
+          <a class="post-neighbor post-neighbor--next" href="small-things.html" rel="next"><span>下一篇</span><strong>把注意力，还给那些小事</strong></a>
+        </nav>
+      </article>
+      <aside class="post-sidebar post-toc--desktop" aria-labelledby="post-toc-title">
+        <div class="post-sidebar-inner">
+          <h2 id="post-toc-title">这一页的目录</h2>
+          <nav aria-labelledby="post-toc-title"><ol>
+<li><a href="#identity-profiles">分清每个人，再保存各自的画像</a></li>
+<li><a href="#tool-loop">让模型判断，让程序确认操作</a></li>
+<li><a href="#rolling-context">让对话持续积累，在接近容量时压缩接续</a></li>
+<li><a href="#summary-topics">摘要负责接续，Topic 负责查找</a></li>
+<li><a href="#prefix-cache">稳定的历史放前面，变化的资料放后面</a></li>
+<li><a href="#self-profile">也给 PA 留下一份自己的画像</a></li>
+          </ol></nav>
+        </div>
+      </aside>
+    </main>
+    <footer class="site-footer"><a class="footer-brand" href="../index.html">LYW Station</a><a class="site-filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026096103号-1</a><nav class="footer-social" aria-label="社交链接"><a class="footer-social-link" href="https://github.com/drunk-cat423" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 18.5c-3.7 1.1-3.7-1.8-5.2-2.2m10.4 4v-2.8c0-.8.1-1.4-.4-1.9 3.2-.4 6.5-1.6 6.5-7.2a5.6 5.6 0 0 0-1.5-3.9 5.2 5.2 0 0 0-.1-3.9s-1.2-.4-4 1.5a13.8 13.8 0 0 0-7.3 0C3.6.2 2.4.6 2.4.6a5.2 5.2 0 0 0-.1 3.9A5.6 5.6 0 0 0 .8 8.4c0 5.6 3.3 6.8 6.5 7.2-.4.4-.5 1-.4 1.9v2.8"/></svg><span>GitHub</span></a><button class="footer-social-link footer-social-link--disabled" type="button" disabled aria-label="RSS 稍后开放" title="RSS 稍后开放"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="19" r="1.2"/><path d="M4 11a9 9 0 0 1 9 9M4 5a15 15 0 0 1 15 15"/></svg><span>RSS</span></button></nav><a class="footer-back-top" href="#top">回到顶部 ↑</a></footer>
+  </div>
+</body>
+</html>

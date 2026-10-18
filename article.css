@@ -196,10 +196,30 @@ body[data-page='post'] {
   overflow-wrap: anywhere;
 }
 
-.post-section p {
+.post-content p {
   margin: 0 0 1.25em;
   color: #34465b;
   font: inherit;
+  overflow-wrap: anywhere;
+}
+
+.post-content > p + .post-section {
+  margin-top: 2.25em;
+}
+
+.post-content code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: .9em;
+}
+
+.post-content pre {
+  margin: 0 0 1.25em;
+  padding: 18px 20px;
+  border: 1px solid rgb(83 125 171 / 13%);
+  border-radius: 5px;
+  background: #f8fbfd;
+  line-height: 1.8;
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 

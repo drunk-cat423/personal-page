@@ -44,6 +44,10 @@ function validateArticles(items) {
     if (!Array.isArray(article.sections) || !article.sections.length) {
       throw new Error(`Article sections are missing: ${article.id}`);
     }
+    if (article.intro !== undefined && (!Array.isArray(article.intro)
+      || article.intro.some((paragraph) => typeof paragraph !== 'string'))) {
+      throw new Error(`Article introduction is invalid: ${article.id}`);
+    }
     if (article.illustration !== undefined) {
       const illustration = article.illustration;
       if (!illustration || typeof illustration !== 'object'
@@ -73,9 +77,20 @@ function validateArticles(items) {
 function estimateReadMinutes(article) {
   const characterCount = article.sections.reduce(
     (total, section) => total + section.paragraphs.reduce((length, paragraph) => length + paragraph.length, 0),
-    0,
+    (article.intro ?? []).reduce((length, paragraph) => length + paragraph.length, 0),
   );
   return Math.max(1, Math.ceil(characterCount / 300));
+}
+
+function renderParagraph(paragraph) {
+  const codeBlock = /^```(?:text)?\n([\s\S]*?)\n```$/.exec(paragraph);
+  if (codeBlock) return `<pre><code>${escapeHTML(codeBlock[1])}</code></pre>`;
+  const content = paragraph.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*)/g).map((part) => {
+    if (part.startsWith('`') && part.endsWith('`')) return `<code>${escapeHTML(part.slice(1, -1))}</code>`;
+    if (part.startsWith('**') && part.endsWith('**')) return `<strong>${escapeHTML(part.slice(2, -2))}</strong>`;
+    return escapeHTML(part);
+  }).join('');
+  return `<p>${content}</p>`;
 }
 
 function renderSections(article) {
@@ -85,7 +100,7 @@ function renderSections(article) {
   const body = article.sections.map((section) => `
       <section class="post-section" aria-labelledby="${escapeHTML(section.id)}">
         <h2 id="${escapeHTML(section.id)}">${escapeHTML(section.title)}</h2>
-${section.paragraphs.map((paragraph) => `        <p>${escapeHTML(paragraph)}</p>`).join('\n')}
+${section.paragraphs.map((paragraph) => `        ${renderParagraph(paragraph)}`).join('\n')}
       </section>`).join('\n');
   return { toc, body };
 }
@@ -151,7 +166,7 @@ ${toc}
           </ol></nav>
         </details>
         <div class="post-content">
-${body}
+${(article.intro ?? []).map((paragraph) => `        ${renderParagraph(paragraph)}`).join('\n')}${body}
         </div>
         <figure class="post-illustration" data-post-image-slot${illustration ? '' : ' hidden'}>${illustrationMarkup}</figure>
         <nav class="post-pagination" aria-label="前后文章">
