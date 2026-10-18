@@ -374,6 +374,47 @@ function setupPostContents() {
   sync();
 }
 
+function setupReadingProgress() {
+  const content = $('.post-content');
+  const progress = $('[data-reading-progress]');
+  if (!content || !progress) return;
+  const percentLabel = $('[data-reading-percent]', progress);
+  if (!percentLabel) return;
+  progress.hidden = false;
+  let frame = 0;
+  let currentPercent;
+
+  function sync() {
+    frame = 0;
+    const end = content.getBoundingClientRect().bottom + scrollY - innerHeight + 32;
+    const fraction = end > 0 ? Math.min(1, Math.max(0, scrollY / end)) : 1;
+    const percent = Math.round(fraction * 100);
+    if (percent === currentPercent) return;
+    currentPercent = percent;
+    progress.style.setProperty('--reading-progress', String(percent));
+    progress.setAttribute('aria-valuenow', String(percent));
+    percentLabel.textContent = `${percent}%`;
+    progress.dataset.progress = String(percent);
+  }
+
+  function schedule() {
+    if (!frame) frame = requestAnimationFrame(sync);
+  }
+
+  window.addEventListener('scroll', schedule, { passive: true });
+  window.addEventListener('resize', schedule);
+  window.addEventListener('pageshow', schedule);
+  window.addEventListener('hashchange', schedule);
+  window.addEventListener('load', schedule, { once: true });
+  if (document.fonts?.ready) document.fonts.ready.then(schedule);
+  if ('ResizeObserver' in window) {
+    const observer = new ResizeObserver(schedule);
+    observer.observe(document.body);
+    observer.observe(content);
+  }
+  sync();
+}
+
 function setupSectionMarks() {
   if (page !== 'home') return;
   const marks = $$('[data-section-mark]');
@@ -463,7 +504,10 @@ setupSceneMotion();
 if (page === 'home') renderHome();
 if (page === 'articles') renderArticles();
 if (page === 'article') openArticleLink();
-if (page === 'post') setupPostContents();
+if (page === 'post') {
+  setupPostContents();
+  setupReadingProgress();
+}
 if (page === 'works') {
   const list = $('[data-work-list]');
   if (list) {

@@ -186,14 +186,88 @@ body[data-page='post'] {
 }
 
 .post-section + .post-section {
-  margin-top: 2.25em;
+  margin-top: 2.75em;
 }
 
 .post-section h2 {
-  margin: 0 0 .65em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 .8em;
   color: var(--heading-ink);
-  font: 500 22px/1.6 var(--sans);
+  font: 600 24px/1.55 var(--sans);
   overflow-wrap: anywhere;
+}
+
+.post-section-mark {
+  display: block;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 52px;
+  object-fit: contain;
+}
+
+.post-section h2 > span {
+  min-width: 0;
+}
+
+.post-reading-tools {
+  position: fixed;
+  z-index: 20;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+body[data-page='post'] .post-reading-tools .footer-back-top {
+  position: static;
+}
+
+.reading-progress {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #fdfefe;
+  color: #537a9b;
+  box-shadow: 0 4px 18px rgb(53 95 137 / 6%);
+  font: 500 11px/1 var(--sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.reading-progress[hidden] {
+  display: none;
+}
+
+.reading-progress svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke-width: 1.6;
+  transform: rotate(-90deg);
+}
+
+.reading-progress-track {
+  stroke: #e0eaf2;
+}
+
+.reading-progress-arc {
+  stroke: #7098b7;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--reading-progress, 0));
+  transition: stroke-dashoffset 160ms ease;
+}
+
+.reading-progress[data-progress='0'] .reading-progress-arc {
+  opacity: 0;
 }
 
 .post-content p {
@@ -437,11 +511,23 @@ body[data-page='post'] {
   }
 
   .post-section + .post-section {
-    margin-top: 2em;
+    margin-top: 2.35em;
   }
 
   .post-section h2 {
     font-size: 21px;
+    gap: 10px;
+  }
+
+  .post-section-mark {
+    flex-basis: 40px;
+    width: 40px;
+    height: 44px;
+  }
+
+  .post-reading-tools {
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
   }
 
   .post-pagination {
