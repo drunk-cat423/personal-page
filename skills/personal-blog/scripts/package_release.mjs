@@ -111,7 +111,8 @@ function isAllowedPath(filePath) {
   const variantsFile = parts.length >= 2 && ['assets', 'posts', 'variants'].includes(parts[0]);
   if (!rootFile && !variantsFile) return false;
   const extension = path.posix.extname(filePath).toLowerCase();
-  return rootFile ? ['.html', '.css', '.js'].includes(extension) : STATIC_EXTENSIONS.has(extension);
+  const noticeFile = /^(?:LICENSE|COPYING|NOTICE)(?:\.[A-Za-z0-9-]+)?$/i.test(path.posix.basename(filePath));
+  return rootFile ? ['.html', '.css', '.js'].includes(extension) : STATIC_EXTENSIONS.has(extension) || noticeFile;
 }
 
 async function ensureOutput(out) {
