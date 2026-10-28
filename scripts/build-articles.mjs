@@ -80,6 +80,11 @@ function validateArticles(items) {
           throw new Error(`Section animation is invalid in ${article.id}#${section.id}`);
         }
       }
+      if (section.demo !== undefined && (!section.demo || section.demo.id !== 'motion-vocabulary'
+        || !Number.isInteger(section.demo.afterParagraph) || section.demo.afterParagraph < 0
+        || section.demo.afterParagraph >= section.paragraphs.length)) {
+        throw new Error(`Section demo is invalid in ${article.id}#${section.id}`);
+      }
     }
   }
 }
@@ -111,9 +116,13 @@ function renderSections(article) {
   const body = article.sections.map((section, sectionIndex) => `
       <section class="post-section" aria-labelledby="${escapeHTML(section.id)}">
         <h2 id="${escapeHTML(section.id)}"><img class="post-section-mark" src="../assets/waymarks/${waymarks[sectionIndex % waymarks.length]}.svg" width="48" height="52" alt="" aria-hidden="true"><span>${escapeHTML(section.title)}</span></h2>
-${section.paragraphs.map((paragraph, index) => `        ${renderParagraph(paragraph)}${section.animation?.afterParagraph === index ? renderAnimation(section.animation) : ''}`).join('\n')}
+${section.paragraphs.map((paragraph, index) => `        ${renderParagraph(paragraph)}${section.animation?.afterParagraph === index ? renderAnimation(section.animation) : ''}${section.demo?.afterParagraph === index ? renderMotionDemo() : ''}`).join('\n')}
       </section>`).join('\n');
   return { toc, body };
+}
+
+function renderMotionDemo() {
+  return `\n${readFileSync(path.join(root, 'assets/fragments/motion-vocabulary.html'), 'utf8').trim()}\n`;
 }
 
 function renderAnimation(animation) {
@@ -163,6 +172,8 @@ function renderArticle(article, index) {
   const categoryName = escapeHTML(article.categoryName);
   const animationScript = article.sections.some((section) => section.animation)
     ? '  <script type="module" src="../context-animation.js?v=20261018-svg"></script>\n' : '';
+  const demoAssets = article.sections.some((section) => section.demo)
+    ? '  <link rel="stylesheet" href="../motion-vocabulary.css?v=20261028-motion">\n  <script type="module" src="../motion-vocabulary.js?v=20261028-motion"></script>\n' : '';
 
   return `<!doctype html>
 <html lang="zh-CN">
@@ -179,8 +190,8 @@ function renderArticle(article, index) {
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
   <link rel="stylesheet" href="../article.css?v=20261018-reading-waymarks">
-  <script type="module" src="../site.js?v=20261018-reading-waymarks" async></script>
-${animationScript}</head>
+  <script type="module" src="../site.js?v=20261028-motion-post" async></script>
+${animationScript}${demoAssets}</head>
 <body data-page="post">
   <a class="skip-link" href="#main-content">跳到主要内容</a>
   <div class="site-shell">

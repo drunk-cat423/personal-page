@@ -1,0 +1,83 @@
+.motion-vocabulary {
+  --mv-accent: var(--blue, #537dab);
+  --mv-paper: var(--paper, #fdfefe);
+  --mv-text: var(--ink, #34465b);
+  --mv-soft: var(--soft-blue, #eaf2fa);
+  --mv-line: #c4d8e8;
+  width: 100%; min-width: 0; margin: 28px 0; padding: 20px;
+  border: 1px solid var(--mv-line); border-radius: 10px;
+  color: var(--mv-text); background: var(--mv-paper);
+  font: 14px/1.65 var(--sans, sans-serif); text-align: left;
+  overflow-wrap: anywhere;
+}
+.motion-vocabulary *, .motion-vocabulary *::before, .motion-vocabulary *::after { box-sizing: border-box; }
+.motion-vocabulary [hidden] { display: none !important; }
+.motion-vocabulary .mv-choices { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 16px; border-bottom: 1px solid var(--mv-line); }
+.motion-vocabulary .mv-button { appearance: none; min-width: 0; min-height: 40px; max-width: 100%; padding: 7px 12px; border: 1px solid var(--mv-line); border-radius: 6px; background: var(--mv-paper); color: var(--mv-text); font: inherit; line-height: 1.5; overflow-wrap: anywhere; cursor: pointer; }
+.motion-vocabulary .mv-choices .mv-button { font-size: 12px; min-height: 36px; padding: 6px 10px; }
+.motion-vocabulary .mv-button:hover { background: var(--mv-soft); }
+.motion-vocabulary .mv-button[aria-pressed='true'], .motion-vocabulary .mv-primary { color: var(--mv-paper); background: var(--mv-accent); border-color: var(--mv-accent); }
+.motion-vocabulary .mv-button:disabled { cursor: wait; opacity: .7; }
+.motion-vocabulary :is(button, select, input):focus-visible { outline: 3px solid #87accd; outline-offset: 3px; }
+.motion-vocabulary .mv-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 16px 0 12px; }
+.motion-vocabulary .mv-heading h3 { min-width: 0; margin: 0; color: var(--heading-ink, #2e4f6b); font: 600 18px/1.5 var(--sans, sans-serif); }
+.motion-vocabulary .mv-meta { flex-shrink: 0; color: #657b90; font-size: 12px; font-variant-numeric: tabular-nums; }
+.motion-vocabulary .mv-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.motion-vocabulary .mv-speed { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; min-width: 0; font-size: 12px; }
+.motion-vocabulary select { max-width: 100%; min-height: 40px; padding: 6px; border: 1px solid var(--mv-line); border-radius: 6px; color: var(--mv-text); background: var(--mv-paper); font: inherit; }
+.motion-vocabulary .mv-scene { position: relative; isolation: isolate; height: 284px; min-width: 0; margin-top: 16px; padding: 18px; border: 1px solid var(--mv-line); border-radius: 8px; background: #f5f9fc; }
+.motion-vocabulary .mv-lane { position: relative; margin: 4px 0 22px; }
+.motion-vocabulary .mv-track { position: relative; height: 36px; margin-top: 8px; border-radius: 20px; background: #e2edf6; }
+.motion-vocabulary .mv-dot { position: absolute; width: 26px; height: 26px; top: 5px; left: 5px; border-radius: 50%; background: var(--mv-accent); }
+.motion-vocabulary .mv-secondary { background: #8a9eaf; }
+.motion-vocabulary .mv-target { position: absolute; left: 58%; top: -4px; bottom: -4px; width: 1px; background: #6b859c; }
+.motion-vocabulary .mv-endpoints { display: flex; justify-content: space-between; gap: 12px; color: #657b90; font-size: 12px; }
+.motion-vocabulary .mv-items { display: flex; gap: 7px; margin-top: 10px; }
+.motion-vocabulary .mv-item { display: grid; place-items: center; flex: 1; min-width: 0; height: 43px; border: 1px solid #bfd3e5; border-radius: 6px; background: #dcebf7; color: #375f83; }
+.motion-vocabulary .mv-scroll-controls { margin-top: 14px; font-size: 13px; }
+.motion-vocabulary output { float: right; font-variant-numeric: tabular-nums; }
+.motion-vocabulary input[type='range'] { display: block; width: 100%; min-width: 0; height: 32px; margin: 4px 0 0; accent-color: var(--mv-accent); cursor: pointer; }
+.motion-vocabulary .mv-detail { margin-top: 14px; min-height: 46px; }
+.motion-vocabulary .mv-access-note { margin-top: 10px; color: #657b90; font-size: 12px; }
+.motion-vocabulary .mv-landscape { position: absolute; inset: 0; overflow: hidden; border-radius: 7px; background: linear-gradient(#eef6fc, #fbfdfe); }
+.motion-vocabulary .mv-layer { position: absolute; inset: 0; pointer-events: none; }
+.motion-vocabulary .mv-sun { position: absolute; right: 18%; top: 25px; width: 42px; height: 42px; border-radius: 50%; background: #d1e2ef; }
+.motion-vocabulary .mv-mountain { position: absolute; left: -10%; width: 120%; height: 260px; clip-path: polygon(0 100%,0 65%,16% 12%,35% 58%,60% 0,80% 60%,100% 24%,100% 100%); }
+.motion-vocabulary .mv-far .mv-mountain { top: 65px; background: #d1e2ef; }
+.motion-vocabulary .mv-mid .mv-mountain { top: 130px; background: #a7c5dd; transform: scaleX(-1); }
+.motion-vocabulary .mv-near .mv-mountain { top: 210px; background: #6f98bb; }
+.motion-vocabulary .mv-layer-label { position: absolute; left: 10px; padding: 2px 6px; border-radius: 3px; background: var(--mv-paper); font-size: 12px; }
+.motion-vocabulary .mv-far .mv-layer-label { top: 27px; }
+.motion-vocabulary .mv-mid .mv-layer-label { top: 122px; }
+.motion-vocabulary .mv-near .mv-layer-label { top: 227px; }
+.motion-vocabulary .mv-scroll-window { position: absolute; inset: 0; overflow: hidden; border-radius: 7px; }
+.motion-vocabulary .mv-scroll-page { position: absolute; top: 40px; left: 12%; right: 12%; }
+.motion-vocabulary .mv-content-block { display: grid; place-items: center; height: 70px; margin-bottom: 20px; background: #e6eff7; border-radius: 4px; }
+.motion-vocabulary .mv-reveal { display: grid; place-items: center; height: 64px; padding: 8px; background: #d4e7f5; border: 1px solid #a5c5df; border-radius: 4px; text-align: center; }
+.motion-vocabulary .mv-trigger { position: absolute; top: 62%; left: 0; right: 0; border-top: 1px dashed #6385a5; pointer-events: none; }
+.motion-vocabulary .mv-trigger span { position: absolute; right: 6px; bottom: 3px; padding: 0 5px; background: var(--mv-paper); font-size: 12px; }
+.motion-vocabulary .mv-scroll-status { position: absolute; top: 8px; left: 8px; padding: 2px 6px; border-radius: 3px; background: var(--mv-paper); font-size: 12px; }
+.motion-vocabulary .mv-state-label { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+.motion-vocabulary .mv-state-label > * { min-width: 0; }
+.motion-vocabulary .mv-layout { position: absolute; inset: 66px 18px 25px; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; align-content: center; }
+.motion-vocabulary .mv-layout.is-expanded { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.motion-vocabulary .mv-layout .mv-item { height: 58px; transform-origin: top left; }
+.motion-vocabulary .mv-share-origin { position: absolute; left: 6%; top: 82px; width: 22%; max-width: 76px; height: 70px; border: 1px dashed #91afc9; border-radius: 12px; }
+.motion-vocabulary .mv-share-dest { position: absolute; left: 42%; right: 6%; top: 60px; height: 170px; border: 1px dashed #91afc9; border-radius: 5px; background: #e6eff7; }
+.motion-vocabulary .mv-cover { position: absolute; display: grid; place-items: center; z-index: 1; background: linear-gradient(145deg, #bcd7eb, #7fa7c9); border: 1px solid #6a96b9; color: #274e70; font-weight: 600; transform-origin: top left; }
+.motion-vocabulary .mv-cover::before { content: ''; position: absolute; inset: 12%; border: 1px solid rgb(253 254 254 / 55%); border-radius: inherit; pointer-events: none; }
+.motion-vocabulary .mv-share-caption { position: absolute; top: 162px; left: 6%; width: 30%; color: #657b90; font-size: 11px; }
+.motion-vocabulary .mv-marquee-window { position: absolute; left: 0; right: 0; top: 95px; overflow: hidden; }
+.motion-vocabulary .mv-marquee-belt { display: flex; width: max-content; }
+.motion-vocabulary .mv-marquee-copy { display: flex; gap: 14px; padding-right: 14px; flex-shrink: 0; }
+.motion-vocabulary .mv-word { display: grid; place-items: center; flex: 0 0 auto; min-width: 112px; height: 64px; padding: 0 16px; border-radius: 5px; background: #deebf6; color: #3c6385; white-space: nowrap; font-size: 15px; letter-spacing: .04em; }
+.motion-vocabulary .mv-micro { display: flex; height: 100%; align-items: center; justify-content: center; flex-direction: column; gap: 18px; }
+.motion-vocabulary .mv-feedback { min-height: 30px; text-align: center; }
+@media (max-width: 440px) {
+  .motion-vocabulary { padding: 12px; }
+  .motion-vocabulary .mv-heading h3 { font-size: 16px; }
+  .motion-vocabulary .mv-scene { padding: 13px; }
+  .motion-vocabulary .mv-layout { left: 12px; right: 12px; gap: 7px; }
+  .motion-vocabulary .mv-controls { gap: 8px; }
+  .motion-vocabulary .mv-choices .mv-button { padding: 6px 8px; }
+}

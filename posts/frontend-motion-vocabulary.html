@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <link rel="icon" type="image/svg+xml" href="../assets/branding/tree.svg?v=20261010-lyw-station">
+  <meta charset="utf-8">
+  <script src="../page-transitions.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fdfefe">
+  <meta name="description" content="记录九个常见的前端动效名词，配上可重播、慢放和拖动的演示，方便比较动作的节奏与用途。">
+  <title>前端动效词典：把名字和效果放在一起 · LYW Station</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
+  <link rel="stylesheet" href="../article.css?v=20261018-reading-waymarks">
+  <script type="module" src="../site.js?v=20261028-motion-post" async></script>
+  <link rel="stylesheet" href="../motion-vocabulary.css?v=20261028-motion">
+  <script type="module" src="../motion-vocabulary.js?v=20261028-motion"></script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <div class="site-shell">
+    <header class="site-header" id="top">
+      <a class="brand" href="../index.html" aria-label="回到主页"><span class="home-label">主页</span><svg class="home-ink" viewBox="0 0 60 12" aria-hidden="true" focusable="false"><path d="M3 5C17 3 38 7 56 4" /><path class="home-ink-echo" d="M9 9C25 7 40 10 51 8" /></svg></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span class="nav-toggle-label">打开菜单</span><span aria-hidden="true">☰</span></button>
+      <nav class="main-nav" id="site-nav" aria-label="主要导航"><a href="../articles.html" aria-current="page">文章</a><a href="../works.html">作品</a><a href="../guestbook.html">留言</a><a href="../about.html">关于</a></nav>
+    </header>
+    <main id="main-content" class="post-page">
+      <article class="post-article">
+        <a class="post-back" href="../articles.html">← 返回文章列表</a>
+        <header class="post-header">
+          <h1 class="post-title">前端动效词典：把名字和效果放在一起</h1>
+          <p class="post-excerpt">记录九个常见的前端动效名词，配上可重播、慢放和拖动的演示，方便比较动作的节奏与用途。</p>
+          <div class="post-meta"><span class="post-category">技术</span><time datetime="2026-10-28">2026.10.28</time><span>约 5 分钟</span></div>
+        </header>
+        <details class="post-toc post-toc--mobile">
+          <summary>这一页的目录</summary>
+          <nav aria-label="文章目录"><ol>
+<li><a href="#motion-playground">先动起来，再对照名字</a></li>
+<li><a href="#motion-rhythm">节奏：缓动、弹簧与错开</a></li>
+<li><a href="#motion-scroll">滚动：视差与触发</a></li>
+<li><a href="#motion-state">状态：布局与共享元素</a></li>
+<li><a href="#motion-feedback">连续运动与操作反馈</a></li>
+          </ol></nav>
+        </details>
+        <div class="post-content">
+        <p>我想把常见的前端动效名词整理成一页：查到名字时，就能顺手看一遍效果。有些动作看起来相近，放在一起比较，才更容易说清楚自己想要哪一种。</p>
+        <p>下面先放一个可以操作的演示区，再按节奏、滚动和状态变化，把这些词各自对应的现象记下来。具体实现可以有不同选择，这里先把动作本身看清楚。</p>
+      <section class="post-section" aria-labelledby="motion-playground">
+        <h2 id="motion-playground"><img class="post-section-mark" src="../assets/waymarks/signpost.svg" width="48" height="52" alt="" aria-hidden="true"><span>先动起来，再对照名字</span></h2>
+        <p>选择一个名词，观察它的动作；看不清时可以切到 0.4 倍慢放，再重播一次。布局动画和共享元素可以来回切换状态，跑马灯可以暂停，微交互则需要点一下演示中的保存按钮。</p>
+<div class="motion-vocabulary" data-motion-vocabulary>
+  <div class="mv-choices" data-mv-choices aria-label="选择动画效果" hidden></div>
+  <div class="mv-heading">
+    <h3 data-mv-title>ease-in-out · 缓动</h3>
+    <span class="mv-meta" data-mv-count>1 / 9</span>
+  </div>
+  <div class="mv-controls" data-mv-controls hidden>
+    <button class="mv-button mv-primary" type="button" data-mv-play>重播动画</button>
+    <label class="mv-speed">播放速度
+      <select data-mv-speed aria-label="播放速度"><option value="1">正常</option><option value="0.4">慢放 0.4×</option></select>
+    </label>
+    <button class="mv-button" type="button" data-mv-pause hidden>暂停</button>
+  </div>
+  <div class="mv-scene" data-mv-scene role="group" aria-label="动画演示区">
+    <div class="mv-lane"><span>匀速 linear</span><div class="mv-track"><span class="mv-dot mv-secondary"></span></div></div>
+    <div class="mv-lane"><span>缓动 ease-in-out</span><div class="mv-track"><span class="mv-dot"></span></div></div>
+    <div class="mv-endpoints"><span>起点</span><span>终点 · 同为 2 秒</span></div>
+  </div>
+  <div class="mv-scroll-controls" data-mv-scroll-controls hidden>
+    <label>滚动位置（模拟） <output data-mv-scroll-value>0%</output>
+      <input type="range" data-mv-scroll min="0" max="100" step="1" value="0" aria-label="滚动位置（模拟）">
+    </label>
+  </div>
+  <div class="mv-detail" data-mv-detail aria-live="polite">先慢、再快、再慢；与匀速小球同时出发、同时到达。</div>
+  <div class="mv-access-note" data-mv-motion-note hidden>已跟随系统减少动态效果。可点击重播，观察简化过渡。</div>
+  <noscript><div class="mv-access-note">启用 JavaScript 后可选择九种效果并重播。缓动改变途中速度，弹簧会越过目标回弹，错开入场改变开始时间；其余演示比较视差、滚动触发、布局变化、共享元素、连续循环和按钮反馈。演示中的滚动由模拟滑块控制，保存只演示本地反馈。</div></noscript>
+</div>
+
+        <p>视差和滚动触发都使用明确标注的“滚动位置（模拟）”滑块，方便来回拖动、重复观察。它们不会跟随这篇文章的真实滚动位置；演示里的保存也只呈现本地反馈，不会上传或保存个人数据。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="motion-rhythm">
+        <h2 id="motion-rhythm"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>节奏：缓动、弹簧与错开</span></h2>
+        <p><strong>ease-in-out · 缓动。</strong> 同样走完一段距离，速度可以有变化。示例中，匀速小球和缓动小球同时出发、同时到达；中途却不会一直并排。ease-in-out 会先慢、再快、最后放慢，适合观察一个动作如何起步和停下。</p>
+        <p><strong>spring · 弹簧。</strong> 元素朝目标运动，可能先越过去，再回弹、逐渐稳定。这里对比两种阻尼：低阻尼回弹更明显，高阻尼的振荡较少。它表达的是朝一个目标收敛的过程，效果也会受到参数选择的影响。</p>
+        <p><strong>stagger · 依次错开。</strong> 一组元素可以使用完全相同的动作，只把开始时间逐个推迟。示例把“同时出现”和“每项延迟 160 ms”放在一起。列表或一组卡片入场时，这种时间差能让视线有一个跟随的顺序。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="motion-scroll">
+        <h2 id="motion-scroll"><img class="post-section-mark" src="../assets/waymarks/trail-flag.svg" width="48" height="52" alt="" aria-hidden="true"><span>滚动：视差与触发</span></h2>
+        <p><strong>parallax · 视差。</strong> 同一次滚动，远景、中景、近景移动的距离不同，就会产生层次。示例分别使用 0.2、0.5、1 倍的移动量，拖动滑块时可以看到近景移动得更多。这里值得观察的是不同层之间的相对运动。</p>
+        <p><strong>scroll-triggered · 滚动触发。</strong> 滚动位置决定动画什么时候开始。示例中的元素越过虚线后，才播放一次入场；往回拖到触发线之外，可以重新准备下一次触发。它与让动画进度持续跟随滚动位置的做法有所区别：本例越线后，入场动作按自己的时间继续播放。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="motion-state">
+        <h2 id="motion-state"><img class="post-section-mark" src="../assets/waymarks/footsteps.svg" width="48" height="52" alt="" aria-hidden="true"><span>状态：布局与共享元素</span></h2>
+        <p><strong>layout animation · 布局动画。</strong> 元素的位置或尺寸随布局变化，动画帮助人看清它去了哪里。演示在四列和两列之间切换，同一组卡片会移动、变宽，再回到另一种排列。</p>
+        <p>这一例使用 FLIP 的思路：先记录旧布局（First），切到新布局并记录位置（Last），用两次测量的差值做反向变换（Invert），最后播放到正常状态（Play）。最终布局先确定，读者看到的则是一段连续的过渡。</p>
+        <p><strong>shared element · 共享元素。</strong> 一个视觉元素在两个状态之间保持连续。这里用同一张封面，从列表中的小卡片移动、放大到详情封面的位置，再返回。这个示例发生在同一个页面内，也不需要真的导航到另一篇文章；可以重点看封面的身份和位置如何延续。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="motion-feedback">
+        <h2 id="motion-feedback"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>连续运动与操作反馈</span></h2>
+        <p><strong>marquee · 跑马灯。</strong> 一组内容沿固定方向匀速移动，首尾接上，形成连续循环。示例把相同内容接在后面，在移动完一组的距离后衔接下一轮。可以暂停检查位置，再继续观察接缝。</p>
+        <p><strong>micro-interaction · 微交互。</strong> 一次很小的操作，也需要合适的回应。点下保存按钮后，按压、处理中、成功提示依次出现，帮助人确认点击被接收、过程还在进行，以及什么时候已经完成。这一例只演示这些状态，不包含真正的数据保存。</p>
+      </section>
+        </div>
+        <figure class="post-illustration" data-post-image-slot hidden></figure>
+        <nav class="post-pagination" aria-label="前后文章">
+          <div class="post-neighbor post-neighbor--prev post-neighbor--empty"><span>上一篇</span><strong>暂无上一篇</strong></div>
+          <a class="post-list-link" href="../articles.html"><svg class="post-list-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7 5 3 9l4 4M3.5 9H12c4.5 0 5 3.5 3 6" /></svg><span class="post-list-label">返回文章列表<svg class="post-list-ink" viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 5C30 3 68 7 116 4" /><path class="post-list-echo" d="M12 9C43 7 77 10 106 8" /></svg></span></a>
+          <a class="post-neighbor post-neighbor--next" href="pa-memory-context.html" rel="next"><span>下一篇</span><strong>让 PA 记住聊天，也记清是谁说的</strong></a>
+        </nav>
+      </article>
+      <aside class="post-sidebar post-toc--desktop" aria-labelledby="post-toc-title">
+        <div class="post-sidebar-inner">
+          <h2 id="post-toc-title">这一页的目录</h2>
+          <nav aria-labelledby="post-toc-title"><ol>
+<li><a href="#motion-playground">先动起来，再对照名字</a></li>
+<li><a href="#motion-rhythm">节奏：缓动、弹簧与错开</a></li>
+<li><a href="#motion-scroll">滚动：视差与触发</a></li>
+<li><a href="#motion-state">状态：布局与共享元素</a></li>
+<li><a href="#motion-feedback">连续运动与操作反馈</a></li>
+          </ol></nav>
+        </div>
+      </aside>
+    </main>
+    <footer class="site-footer"><a class="footer-brand" href="../index.html">LYW Station</a><a class="site-filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026096103号-1</a><nav class="footer-social" aria-label="社交链接"><a class="footer-social-link" href="https://github.com/drunk-cat423" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 18.5c-3.7 1.1-3.7-1.8-5.2-2.2m10.4 4v-2.8c0-.8.1-1.4-.4-1.9 3.2-.4 6.5-1.6 6.5-7.2a5.6 5.6 0 0 0-1.5-3.9 5.2 5.2 0 0 0-.1-3.9s-1.2-.4-4 1.5a13.8 13.8 0 0 0-7.3 0C3.6.2 2.4.6 2.4.6a5.2 5.2 0 0 0-.1 3.9A5.6 5.6 0 0 0 .8 8.4c0 5.6 3.3 6.8 6.5 7.2-.4.4-.5 1-.4 1.9v2.8"/></svg><span>GitHub</span></a><button class="footer-social-link footer-social-link--disabled" type="button" disabled aria-label="RSS 稍后开放" title="RSS 稍后开放"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="19" r="1.2"/><path d="M4 11a9 9 0 0 1 9 9M4 5a15 15 0 0 1 15 15"/></svg><span>RSS</span></button></nav><div class="post-reading-tools">
+      <div class="reading-progress" data-reading-progress role="progressbar" aria-label="文章阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
+        <svg viewBox="0 0 46 46" aria-hidden="true" focusable="false"><circle class="reading-progress-track" cx="23" cy="23" r="20"/><circle class="reading-progress-arc" cx="23" cy="23" r="20" pathLength="100"/></svg>
+        <span data-reading-percent>0%</span>
+      </div>
+      <a class="footer-back-top" href="#top">回到顶部 ↑</a>
+    </div></footer>
+  </div>
+</body>
+</html>

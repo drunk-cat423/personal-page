@@ -1,4 +1,4 @@
-import { articles, works, messages } from './content.js?v=20261010-detective-ink';
+import { articles, works, messages } from './content.js?v=20261028-motion-post';
 import { setupPoseScene } from './scene-player.js?v=20261010-pose-player';
 import { createCommentAvatar } from './comment-avatars.js?v=20261010-avatar-icons';
 

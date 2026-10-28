@@ -1,0 +1,27 @@
+<div class="motion-vocabulary" data-motion-vocabulary>
+  <div class="mv-choices" data-mv-choices aria-label="选择动画效果" hidden></div>
+  <div class="mv-heading">
+    <h3 data-mv-title>ease-in-out · 缓动</h3>
+    <span class="mv-meta" data-mv-count>1 / 9</span>
+  </div>
+  <div class="mv-controls" data-mv-controls hidden>
+    <button class="mv-button mv-primary" type="button" data-mv-play>重播动画</button>
+    <label class="mv-speed">播放速度
+      <select data-mv-speed aria-label="播放速度"><option value="1">正常</option><option value="0.4">慢放 0.4×</option></select>
+    </label>
+    <button class="mv-button" type="button" data-mv-pause hidden>暂停</button>
+  </div>
+  <div class="mv-scene" data-mv-scene role="group" aria-label="动画演示区">
+    <div class="mv-lane"><span>匀速 linear</span><div class="mv-track"><span class="mv-dot mv-secondary"></span></div></div>
+    <div class="mv-lane"><span>缓动 ease-in-out</span><div class="mv-track"><span class="mv-dot"></span></div></div>
+    <div class="mv-endpoints"><span>起点</span><span>终点 · 同为 2 秒</span></div>
+  </div>
+  <div class="mv-scroll-controls" data-mv-scroll-controls hidden>
+    <label>滚动位置（模拟） <output data-mv-scroll-value>0%</output>
+      <input type="range" data-mv-scroll min="0" max="100" step="1" value="0" aria-label="滚动位置（模拟）">
+    </label>
+  </div>
+  <div class="mv-detail" data-mv-detail aria-live="polite">先慢、再快、再慢；与匀速小球同时出发、同时到达。</div>
+  <div class="mv-access-note" data-mv-motion-note hidden>已跟随系统减少动态效果。可点击重播，观察简化过渡。</div>
+  <noscript><div class="mv-access-note">启用 JavaScript 后可选择九种效果并重播。缓动改变途中速度，弹簧会越过目标回弹，错开入场改变开始时间；其余演示比较视差、滚动触发、布局变化、共享元素、连续循环和按钮反馈。演示中的滚动由模拟滑块控制，保存只演示本地反馈。</div></noscript>
+</div>
