@@ -6,9 +6,18 @@
   </div>
   <div class="mv-controls" data-mv-controls hidden>
     <button class="mv-button mv-primary" type="button" data-mv-play>重播动画</button>
-    <label class="mv-speed">播放速度
-      <select data-mv-speed aria-label="播放速度"><option value="1">正常</option><option value="0.4">慢放 0.4×</option></select>
-    </label>
+    <div class="mv-speed">
+      <span>播放速度</span>
+      <div class="mv-speed-picker">
+        <button class="mv-button mv-speed-trigger" type="button" data-mv-speed-trigger aria-label="播放速度：正常" aria-haspopup="listbox" aria-expanded="false">
+          <span data-mv-speed-label>正常</span><span class="mv-speed-chevron" aria-hidden="true">⌄</span>
+        </button>
+        <div class="mv-speed-menu" data-mv-speed-menu role="listbox" aria-label="播放速度" hidden>
+          <div class="mv-speed-option" role="option" data-mv-speed-option="1" aria-selected="true" tabindex="-1">正常</div>
+          <div class="mv-speed-option" role="option" data-mv-speed-option="0.4" aria-selected="false" tabindex="-1">慢放 0.4×</div>
+        </div>
+      </div>
+    </div>
     <button class="mv-button" type="button" data-mv-pause hidden>暂停</button>
   </div>
   <div class="mv-scene" data-mv-scene role="group" aria-label="动画演示区">

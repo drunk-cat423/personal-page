@@ -12,6 +12,7 @@
     ['marquee', 'marquee', '跑马灯', '两份相同内容首尾衔接，以恒定速度连续循环；可暂停观察。'],
     ['micro', 'micro-interaction', '微交互', '点击保存，观察按压、处理中和成功反馈。仅本地演示，不写入数据。']
   ];
+  let speedMenuSequence = 0;
   const springPosition = (seconds, damping) => {
     const naturalFrequency = 12;
     const ratio = Math.sqrt(1 - damping * damping);
@@ -29,6 +30,11 @@
     const playButton = q('[data-mv-play]');
     const pauseButton = q('[data-mv-pause]');
     const slider = q('[data-mv-scroll]');
+    const speedPicker = q('.mv-speed-picker');
+    const speedTrigger = q('[data-mv-speed-trigger]');
+    const speedLabel = q('[data-mv-speed-label]');
+    const speedMenu = q('[data-mv-speed-menu]');
+    const speedOptions = [...speedMenu.querySelectorAll('[data-mv-speed-option]')];
     const preference = matchMedia('(prefers-reduced-motion: reduce)');
     const events = new AbortController();
     const animations = new Set();
@@ -47,8 +53,45 @@
     let sceneWidth = scene.clientWidth;
     let marqueeWidth = 0;
 
+    let speedMenuId;
+    do { speedMenuId = `mv-speed-listbox-${++speedMenuSequence}`; }
+    while (document.getElementById(speedMenuId));
+    speedMenu.id = speedMenuId;
+    speedTrigger.setAttribute('aria-controls', speedMenuId);
+
     const on = (element, name, callback) => element.addEventListener(name, callback, { signal: events.signal });
     const canRun = () => !destroyed && inView && !document.hidden && !pageSuspended && !userPaused;
+
+    function closeSpeedMenu(returnFocus = false) {
+      speedMenu.hidden = true;
+      speedTrigger.setAttribute('aria-expanded', 'false');
+      if (returnFocus) speedTrigger.focus();
+    }
+
+    function openSpeedMenu(focusOption = false) {
+      speedMenu.hidden = false;
+      speedTrigger.setAttribute('aria-expanded', 'true');
+      if (focusOption) (speedOptions.find(option => option.getAttribute('aria-selected') === 'true') || speedOptions[0]).focus();
+    }
+
+    function chooseSpeed(option) {
+      speed = Number(option.dataset.mvSpeedOption);
+      speedLabel.textContent = option.textContent.trim();
+      speedTrigger.setAttribute('aria-label', `播放速度：${speedLabel.textContent}`);
+      speedOptions.forEach(item => item.setAttribute('aria-selected', String(item === option)));
+      animations.forEach(animation => animation.updatePlaybackRate(speed));
+      closeSpeedMenu(true);
+    }
+
+    function moveSpeedFocus(option, key) {
+      const index = speedOptions.indexOf(option);
+      let nextIndex = index;
+      if (key === 'ArrowDown') nextIndex = (index + 1) % speedOptions.length;
+      if (key === 'ArrowUp') nextIndex = (index - 1 + speedOptions.length) % speedOptions.length;
+      if (key === 'Home') nextIndex = 0;
+      if (key === 'End') nextIndex = speedOptions.length - 1;
+      speedOptions[nextIndex].focus();
+    }
 
     function syncPlayback() {
       if (destroyed) return;
@@ -312,10 +355,40 @@
     on(scene, 'click', event => {
       if (current === 'micro' && event.target.closest('[data-mv-save]') && !q('[data-mv-save]').disabled) save();
     });
-    on(q('[data-mv-speed]'), 'change', event => {
-      speed = Number(event.target.value);
-      animations.forEach(animation => animation.updatePlaybackRate(speed));
+    on(speedTrigger, 'click', event => {
+      if (speedMenu.hidden) openSpeedMenu(event.detail === 0);
+      else closeSpeedMenu();
     });
+    on(speedTrigger, 'keydown', event => {
+      if (event.key === 'Escape' && !speedMenu.hidden) {
+        event.preventDefault();
+        closeSpeedMenu(true);
+        return;
+      }
+      if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      openSpeedMenu(true);
+      if (event.key === 'Home') speedOptions[0].focus();
+      if (event.key === 'End') speedOptions[speedOptions.length - 1].focus();
+      if (event.key === 'ArrowUp') speedOptions[speedOptions.length - 1].focus();
+    });
+    speedOptions.forEach(option => {
+      on(option, 'click', () => chooseSpeed(option));
+      on(option, 'keydown', event => {
+        if (['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+          event.preventDefault();
+          moveSpeedFocus(option, event.key);
+        } else if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          chooseSpeed(option);
+        } else if (event.key === 'Escape') {
+          event.preventDefault();
+          closeSpeedMenu(true);
+        }
+      });
+    });
+    on(document, 'focusin', event => { if (!speedPicker.contains(event.target)) closeSpeedMenu(); });
+    on(document, 'click', event => { if (!speedPicker.contains(event.target)) closeSpeedMenu(); });
     on(slider, 'input', event => {
       stopTimeline();
       setScroll(Number(event.target.value));

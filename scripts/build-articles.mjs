@@ -173,7 +173,7 @@ function renderArticle(article, index) {
   const animationScript = article.sections.some((section) => section.animation)
     ? '  <script type="module" src="../context-animation.js?v=20261018-svg"></script>\n' : '';
   const demoAssets = article.sections.some((section) => section.demo)
-    ? '  <link rel="stylesheet" href="../motion-vocabulary.css?v=20261028-motion">\n  <script type="module" src="../motion-vocabulary.js?v=20261028-motion"></script>\n' : '';
+    ? '  <link rel="stylesheet" href="../motion-vocabulary.css?v=20261028-soft-controls">\n  <script type="module" src="../motion-vocabulary.js?v=20261028-soft-controls"></script>\n' : '';
 
   return `<!doctype html>
 <html lang="zh-CN">
@@ -190,7 +190,7 @@ function renderArticle(article, index) {
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
   <link rel="stylesheet" href="../article.css?v=20261018-reading-waymarks">
-  <script type="module" src="../site.js?v=20261028-motion-post" async></script>
+  <script type="module" src="../site.js?v=20261028-soft-controls" async></script>
 ${animationScript}${demoAssets}</head>
 <body data-page="post">
   <a class="skip-link" href="#main-content">跳到主要内容</a>

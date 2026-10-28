@@ -13,19 +13,27 @@
 .motion-vocabulary *, .motion-vocabulary *::before, .motion-vocabulary *::after { box-sizing: border-box; }
 .motion-vocabulary [hidden] { display: none !important; }
 .motion-vocabulary .mv-choices { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 16px; border-bottom: 1px solid var(--mv-line); }
-.motion-vocabulary .mv-button { appearance: none; min-width: 0; min-height: 40px; max-width: 100%; padding: 7px 12px; border: 1px solid var(--mv-line); border-radius: 6px; background: var(--mv-paper); color: var(--mv-text); font: inherit; line-height: 1.5; overflow-wrap: anywhere; cursor: pointer; }
+.motion-vocabulary .mv-button { appearance: none; outline: none; min-width: 0; min-height: 40px; max-width: 100%; padding: 7px 12px; border: 1px solid var(--mv-line); border-radius: 6px; background: var(--mv-paper); color: var(--mv-text); font: inherit; line-height: 1.5; overflow-wrap: anywhere; cursor: pointer; transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease; }
 .motion-vocabulary .mv-choices .mv-button { font-size: 12px; min-height: 36px; padding: 6px 10px; }
-.motion-vocabulary .mv-button:hover { background: var(--mv-soft); }
+.motion-vocabulary .mv-button:not(.mv-primary):not([aria-pressed='true']):hover { background: var(--mv-soft); }
 .motion-vocabulary .mv-button[aria-pressed='true'], .motion-vocabulary .mv-primary { color: var(--mv-paper); background: var(--mv-accent); border-color: var(--mv-accent); }
+.motion-vocabulary .mv-primary:hover, .motion-vocabulary .mv-button[aria-pressed='true']:hover { color: var(--mv-paper); background: #426b96; border-color: #426b96; }
 .motion-vocabulary .mv-button:disabled { cursor: wait; opacity: .7; }
-.motion-vocabulary :is(button, select, input):focus-visible { outline: 3px solid #87accd; outline-offset: 3px; }
+.motion-vocabulary :is(button, input):focus-visible { outline: 1px solid #8aaac7; outline-offset: 0; box-shadow: 0 0 0 3px rgb(135 172 205 / 22%); }
 .motion-vocabulary .mv-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 16px 0 12px; }
 .motion-vocabulary .mv-heading h3 { min-width: 0; margin: 0; color: var(--heading-ink, #2e4f6b); font: 600 18px/1.5 var(--sans, sans-serif); }
 .motion-vocabulary .mv-meta { flex-shrink: 0; color: #657b90; font-size: 12px; font-variant-numeric: tabular-nums; }
-.motion-vocabulary .mv-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.motion-vocabulary .mv-controls { position: relative; z-index: 2; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 .motion-vocabulary .mv-speed { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; min-width: 0; font-size: 12px; }
-.motion-vocabulary select { max-width: 100%; min-height: 40px; padding: 6px; border: 1px solid var(--mv-line); border-radius: 6px; color: var(--mv-text); background: var(--mv-paper); font: inherit; }
-.motion-vocabulary .mv-scene { position: relative; isolation: isolate; height: 284px; min-width: 0; margin-top: 16px; padding: 18px; border: 1px solid var(--mv-line); border-radius: 8px; background: #f5f9fc; }
+.motion-vocabulary .mv-speed-picker { position: relative; }
+.motion-vocabulary .mv-speed-trigger { display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 104px; min-height: 40px; padding: 6px 10px; border-radius: 8px; }
+.motion-vocabulary .mv-speed-chevron { color: #71879b; font-size: 14px; line-height: 1; }
+.motion-vocabulary .mv-speed-menu { position: absolute; z-index: 3; left: 0; top: calc(100% + 6px); display: grid; width: max-content; min-width: 132px; max-width: min(220px, calc(100vw - 40px)); padding: 5px; border: 1px solid #d4e0ea; border-radius: 9px; background: var(--mv-paper); box-shadow: 0 5px 16px rgb(44 68 91 / 14%); animation: mv-menu-in 120ms ease-out both; }
+.motion-vocabulary .mv-speed-menu[hidden] { display: none; }
+.motion-vocabulary .mv-speed-option { min-width: 0; padding: 8px 10px; border-radius: 6px; color: var(--mv-text); font-size: 13px; line-height: 1.4; cursor: pointer; }
+.motion-vocabulary .mv-speed-option:hover, .motion-vocabulary .mv-speed-option[aria-selected='true'] { background: #eef4f9; }
+.motion-vocabulary .mv-speed-option:focus { outline: 1px solid #8aaac7; outline-offset: -1px; background: #f1f6fa; box-shadow: 0 0 0 2px rgb(135 172 205 / 18%); }
+.motion-vocabulary .mv-scene { position: relative; z-index: 0; isolation: isolate; height: 284px; min-width: 0; margin-top: 16px; padding: 18px; border: 1px solid var(--mv-line); border-radius: 8px; background: #f5f9fc; }
 .motion-vocabulary .mv-lane { position: relative; margin: 4px 0 22px; }
 .motion-vocabulary .mv-track { position: relative; height: 36px; margin-top: 8px; border-radius: 20px; background: #e2edf6; }
 .motion-vocabulary .mv-dot { position: absolute; width: 26px; height: 26px; top: 5px; left: 5px; border-radius: 50%; background: var(--mv-accent); }
@@ -73,6 +81,11 @@
 .motion-vocabulary .mv-word { display: grid; place-items: center; flex: 0 0 auto; min-width: 112px; height: 64px; padding: 0 16px; border-radius: 5px; background: #deebf6; color: #3c6385; white-space: nowrap; font-size: 15px; letter-spacing: .04em; }
 .motion-vocabulary .mv-micro { display: flex; height: 100%; align-items: center; justify-content: center; flex-direction: column; gap: 18px; }
 .motion-vocabulary .mv-feedback { min-height: 30px; text-align: center; }
+@keyframes mv-menu-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .motion-vocabulary .mv-speed-menu { animation: none; }
+  .motion-vocabulary .mv-button { transition: none; }
+}
 @media (max-width: 440px) {
   .motion-vocabulary { padding: 12px; }
   .motion-vocabulary .mv-heading h3 { font-size: 16px; }
