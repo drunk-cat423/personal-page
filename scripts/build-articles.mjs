@@ -173,7 +173,7 @@ function renderArticle(article, index) {
   const animationScript = article.sections.some((section) => section.animation)
     ? '  <script type="module" src="../context-animation.js?v=20261018-svg"></script>\n' : '';
   const demoAssets = article.sections.some((section) => section.demo)
-    ? '  <link rel="stylesheet" href="../motion-vocabulary.css?v=20261028-menu-unfold">\n  <script type="module" src="../motion-vocabulary.js?v=20261028-soft-controls"></script>\n' : '';
+    ? '  <link rel="stylesheet" href="../motion-vocabulary.css?v=20261028-menu-fast">\n  <script type="module" src="../motion-vocabulary.js?v=20261028-soft-controls"></script>\n' : '';
 
   return `<!doctype html>
 <html lang="zh-CN">

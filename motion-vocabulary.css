@@ -28,7 +28,7 @@
 .motion-vocabulary .mv-speed-picker { position: relative; }
 .motion-vocabulary .mv-speed-trigger { display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 104px; min-height: 40px; padding: 6px 10px; border-radius: 8px; }
 .motion-vocabulary .mv-speed-chevron { color: #71879b; font-size: 14px; line-height: 1; }
-.motion-vocabulary .mv-speed-menu { position: absolute; z-index: 3; left: 0; top: calc(100% + 6px); display: grid; width: max-content; min-width: 132px; max-width: min(220px, calc(100vw - 40px)); padding: 5px; border: 1px solid #d4e0ea; border-radius: 9px; background: var(--mv-paper); box-shadow: 0 5px 16px rgb(44 68 91 / 14%); animation: mv-menu-in 160ms ease-out; }
+.motion-vocabulary .mv-speed-menu { position: absolute; z-index: 3; left: 0; top: calc(100% + 6px); display: grid; width: max-content; min-width: 132px; max-width: min(220px, calc(100vw - 40px)); padding: 5px; border: 1px solid #d4e0ea; border-radius: 9px; background: var(--mv-paper); box-shadow: 0 5px 16px rgb(44 68 91 / 14%); animation: mv-menu-in 100ms ease-out; }
 .motion-vocabulary .mv-speed-menu[hidden] { display: none; }
 .motion-vocabulary .mv-speed-option { min-width: 0; padding: 8px 10px; border-radius: 6px; color: var(--mv-text); font-size: 13px; line-height: 1.4; cursor: pointer; }
 .motion-vocabulary .mv-speed-option:hover, .motion-vocabulary .mv-speed-option[aria-selected='true'] { background: #eef4f9; }
