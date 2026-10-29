@@ -201,30 +201,6 @@ export const works = [
     url: 'https://github.com/drunk-cat423/detective', coverImage: 'assets/works/detective-ink-v1.png',
     excerpt: '把线索、人物关系和时间线放在同一张便签画布上，为推理小说与剧情游戏整理思路。',
     paragraphs: ['一个面向推理小说与剧情游戏的思路整理工具。用便签记录线索与人物，通过连线梳理关系，再用时间线回看事件的先后。', '项目源码与使用说明见 GitHub 仓库。']
-  },
-  {
-    id: 'quiet-window', cover: 'window', dateISO: '2026-09-20', date: '2026.09',
-    title: '一扇可以慢慢打开的窗', categoryName: '网页概念', excerpt: '把一句文字、天气和一小块留白放在一起，做成安静的日常入口。',
-    paragraphs: [
-      '这是一个关于收藏日常片刻的小页面概念。设想里有一句随手写下的话、一点天气线索，以及可以慢慢回看的旧记录。',
-      '目前它是一份设计练习，用来探索轻量阅读和回看的节奏。页面没有外部服务或在线版本。'
-    ]
-  },
-  {
-    id: 'idea-garden', cover: 'notes', dateISO: '2026-08-30', date: '2026.08',
-    title: '给未完成的想法留个位置', categoryName: '工具概念', excerpt: '一个轻量的灵感收纳练习，让还没想清楚的事情也能先停靠。',
-    paragraphs: [
-      '这个概念从一个很小的需求开始：让不完整的念头有地方暂存。先写下一句，再决定它要不要发展成更大的计划。',
-      '界面设想以短条目和简单回看为主。当前这里只展示方向说明，没有仓库、下载或上线入口。'
-    ]
-  },
-  {
-    id: 'small-archive', cover: 'archive', dateISO: '2026-07-16', date: '2026.07',
-    title: '把零散片刻收进小档案', categoryName: '记录练习', excerpt: '用日期和一行摘要整理照片、句子与值得记住的小发现。',
-    paragraphs: [
-      '小档案的想法，是把零散的片刻按时间放好。每一条只需要日期、一句说明和一个轻轻的主题提示。',
-      '它是一份内容与界面构想，强调容易浏览和回想。现在展示的文字与窗口都是示例。'
-    ]
   }
 ].sort((a, b) => b.dateISO.localeCompare(a.dateISO));
 
