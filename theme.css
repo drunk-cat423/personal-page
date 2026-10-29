@@ -154,6 +154,10 @@
 :root[data-theme='dark'] .waline-wall .wl-cards > .wl-card-item { border-color: var(--theme-line); background: linear-gradient(160deg, #263646, #202d3a); box-shadow: var(--theme-shadow); }
 :root[data-theme='dark'] .waline-wall .wl-cards > .wl-card-item::before { background: linear-gradient(45deg, #35495a 49%, #263646 50%); }
 :root[data-theme='dark'] .waline-wall .wl-card .wl-head .wl-nick { color: #d6e4ef; }
+:root[data-theme='dark'] .message-author,
+:root[data-theme='dark'] .waline-wall .wl-card .wl-head .wl-nick { background: none; color: var(--heading-ink); }
+:root[data-theme='dark'] .message-author::after,
+:root[data-theme='dark'] .waline-wall .wl-card .wl-head .wl-nick::after { display: none; }
 :root[data-theme='dark'] .waline-wall .wl-card .wl-content,
 :root[data-theme='dark'] .waline-wall .wl-card .wl-content a { color: var(--ink); }
 :root[data-theme='dark'] .waline-wall .wl-card .wl-card-item { border-color: var(--theme-line); }

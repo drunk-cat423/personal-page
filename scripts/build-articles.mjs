@@ -192,7 +192,7 @@ function renderArticle(article, index) {
   <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
   <link rel="stylesheet" href="../article.css?v=20261018-reading-waymarks">
   <script type="module" src="../site.js?v=20261029-theme-nav" async></script>
-${animationScript}${demoAssets}  <link rel="stylesheet" href="../theme.css?v=20261029-dark-r2">
+${animationScript}${demoAssets}  <link rel="stylesheet" href="../theme.css?v=20261029-dark-names">
 </head>
 <body data-page="post">
   <a class="skip-link" href="#main-content">跳到主要内容</a>
