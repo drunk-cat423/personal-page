@@ -203,6 +203,7 @@ function openArticleLink() {
   const article = articles.find(item => item.id === id);
   if (article) {
     const target = new URL(`posts/${encodeURIComponent(article.id)}.html`, document.baseURI);
+    target.searchParams.set('v', new URLSearchParams(location.search).get('v') || '20261029-theme-nav');
     target.hash = location.hash;
     location.replace(target.href);
     return;

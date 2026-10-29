@@ -3,6 +3,7 @@
   'use strict';
   const key = 'lyw-theme';
   const root = document.documentElement;
+  const documentRevision = '20261029-theme-nav';
   const system = matchMedia('(prefers-color-scheme: dark)');
   let choice = readChoice();
   let button;
@@ -46,6 +47,18 @@
   }
 
   apply();
+  // Bypass HTML cached before the server gained document revalidation headers.
+  function versionDocumentLink(event) {
+    const link = event.target instanceof Element ? event.target.closest('a[href]') : null;
+    if (!link || link.hasAttribute('download') || event.defaultPrevented) return;
+    const destination = new URL(link.href, location.href);
+    if (destination.origin !== location.origin || !destination.pathname.endsWith('.html')) return;
+    if (destination.pathname === location.pathname && destination.search === location.search) return;
+    destination.searchParams.set('v', documentRevision);
+    link.href = destination.href;
+  }
+  document.addEventListener('click', versionDocumentLink, { capture: true });
+  document.addEventListener('auxclick', versionDocumentLink, { capture: true });
   system.addEventListener('change', () => { if (!choice) apply(); });
   window.addEventListener('storage', event => {
     if (event.key === key || event.key === null) { choice = readChoice(); apply(); }
