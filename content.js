@@ -189,6 +189,13 @@ export const articles = [
 
 export const works = [
   {
+    id: 'pa', cover: 'pa', dateISO: '2026-10-29', date: '2026.10',
+    title: 'PA · Personal Agent', categoryName: 'AI 伙伴', status: '源码仓库',
+    url: 'https://github.com/drunk-cat423/pa', coverImage: 'assets/works/pa-ink.svg',
+    excerpt: '一个以 TypeScript 和 Pi 构建的长期 AI 伙伴，在对话中积累记忆、维护画像，让交流有可以延续的背景。',
+    paragraphs: ['PA 是我正在搭建的长期 AI 伙伴，目前已接入 QQ 群聊与私聊。围绕长期记忆、人物画像、上下文压缩与身份区分，让日常交流能够慢慢积累。', '项目源码与使用说明见 GitHub 仓库。']
+  },
+  {
     id: 'detective-assistant', cover: 'detective', dateISO: '2026-10-10', date: '2026.10',
     title: '推理助手', categoryName: '在线工具', status: '源码仓库',
     url: 'https://github.com/drunk-cat423/detective', coverImage: 'assets/works/detective-ink-v1.png',

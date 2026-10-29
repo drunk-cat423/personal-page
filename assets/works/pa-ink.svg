@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 425" fill="none">
+  <rect width="640" height="425" rx="12" fill="#f6f9fc"/>
+  <g stroke="#c8d9e7" stroke-width="1" opacity=".5">
+    <path d="M40 73H600M40 113H600M40 153H600M40 193H600M40 233H600M40 273H600M40 313H600M40 353H600"/>
+  </g>
+  <g font-family="'DM Sans','Microsoft YaHei',sans-serif" fill="#547a9b">
+    <text x="58" y="58" font-size="27" font-weight="600">PA</text>
+    <text x="108" y="57" font-size="17" letter-spacing="2">PERSONAL AGENT</text>
+  </g>
+  <path d="M68 98 363 96 366 310 101 313 70 337Z" fill="#eaf2f8" stroke="#94b0c8" stroke-width="2" stroke-linejoin="round"/>
+  <path d="m76 105 279-2 2 197" stroke="#bdcfde" stroke-width="1.2"/>
+  <rect x="93" y="126" width="133" height="39" rx="17" fill="#fdfefe" stroke="#c8d9e6"/>
+  <path d="M113 145h91" stroke="#8ca9bf" stroke-width="3" stroke-linecap="round"/>
+  <rect x="153" y="183" width="183" height="57" rx="18" fill="#dceaf5"/>
+  <path d="M174 204h135m-135 16h96" stroke="#789bb8" stroke-width="3" stroke-linecap="round"/>
+  <rect x="94" y="257" width="127" height="28" rx="14" fill="#fdfefe"/>
+  <circle cx="115" cy="271" r="3" fill="#9cb6cb"/><circle cx="130" cy="271" r="3" fill="#9cb6cb"/><circle cx="145" cy="271" r="3" fill="#9cb6cb"/>
+  <path d="M350 150c62-37 107-16 113 29m-8-6 8 8 5-10" stroke="#91acc1" stroke-width="2" stroke-dasharray="4 6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m397 189 178 5-5 143-180-6Z" fill="#e6eef5" stroke="#b4c8d9" stroke-width="1.5"/>
+  <path d="m385 181 178 5-5 143-180-6Z" fill="#fdfefe" stroke="#94b0c8" stroke-width="2" stroke-linejoin="round"/>
+  <path d="m409 249 122 3m-123 18 102 2m-103 18 114 2" stroke="#c0d2df" stroke-width="3" stroke-linecap="round"/>
+  <g font-family="'Microsoft YaHei','Noto Sans SC',sans-serif" fill="#527797">
+    <text x="410" y="225" font-size="21">慢慢记住</text>
+    <text x="188" y="383" font-size="19" letter-spacing="3">让对话有可以延续的背景</text>
+  </g>
+  <path d="m447 361 8-4 8 5-1 11-9 4-8-6Z" fill="#dde9e0" stroke="#a8bcaf" stroke-width="1.2"/>
+</svg>
