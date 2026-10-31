@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <link rel="icon" type="image/svg+xml" href="../assets/branding/tree.svg?v=20261010-lyw-station">
+  <meta charset="utf-8">
+  <script src="../theme.js?v=20261029-theme-nav"></script>
+  <script src="../page-transitions.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fdfefe">
+  <meta name="description" content="从可观察的验证结果、故障路径和独立审查出发，整理我对 Agent 代码审查的几个心智模型。">
+  <title>让 Agent 写代码之后，我该怎么相信它写对了？ · LYW Station</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
+  <link rel="stylesheet" href="../article.css?v=20261018-reading-waymarks">
+  <script type="module" src="../site.js?v=20261031-agent-review" async></script>
+  <link rel="stylesheet" href="../theme.css?v=20261029-dark-names">
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <div class="site-shell">
+    <header class="site-header" id="top">
+      <a class="brand" href="../index.html" aria-label="回到主页"><span class="home-label">主页</span><svg class="home-ink" viewBox="0 0 60 12" aria-hidden="true" focusable="false"><path d="M3 5C17 3 38 7 56 4" /><path class="home-ink-echo" d="M9 9C25 7 40 10 51 8" /></svg></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span class="nav-toggle-label">打开菜单</span><span aria-hidden="true">☰</span></button>
+      <nav class="main-nav" id="site-nav" aria-label="主要导航"><a href="../articles.html" aria-current="page">文章</a><a href="../works.html">作品</a><a href="../guestbook.html">留言</a><a href="../about.html">关于</a></nav>
+    </header>
+    <main id="main-content" class="post-page">
+      <article class="post-article">
+        <a class="post-back" href="../articles.html">← 返回文章列表</a>
+        <header class="post-header">
+          <h1 class="post-title">让 Agent 写代码之后，我该怎么相信它写对了？</h1>
+          <p class="post-excerpt">从可观察的验证结果、故障路径和独立审查出发，整理我对 Agent 代码审查的几个心智模型。</p>
+          <div class="post-meta"><span class="post-category">技术</span><time datetime="2026-10-31">2026.10.31</time><span>约 9 分钟</span></div>
+        </header>
+        <details class="post-toc post-toc--mobile">
+          <summary>这一页的目录</summary>
+          <nav aria-label="文章目录"><ol>
+<li><a href="#observable-evidence">一、信任来自可观察的结果</a></li>
+<li><a href="#failure-path">二、沿着故障路径选择测试</a></li>
+<li><a href="#independent-review">三、独立审查：共享事实，独立判断</a></li>
+<li><a href="#review-convergence">四、审查要让问题逐步收敛</a></li>
+<li><a href="#accountable-loop">五、把自动化接成有责任边界的闭环</a></li>
+          </ol></nav>
+        </details>
+        <div class="post-content">
+        <p>最近读了 Anthropic 的一篇文章：<a href="https://claude.dev/blog/solving-code-review-at-anthropic/">How the Claude Code team does code review</a>。</p>
+        <p>读的时候，我一直在想自己使用 Agent 开发时遇到的问题：它能很快写出代码，也能详细解释自己做了什么，但我经常很难判断，这次改动到底能不能放心接受。</p>
+        <p>尤其是代码里夹杂着过多的防御性判断，以及一些价值不高的测试时，审查本身也会变成负担。</p>
+        <p>围绕这些疑问，我逐渐整理出了几个对自己有用的理解。</p>
+      <section class="post-section" aria-labelledby="observable-evidence">
+        <h2 id="observable-evidence"><img class="post-section-mark" src="../assets/waymarks/signpost.svg" width="48" height="52" alt="" aria-hidden="true"><span>一、信任来自可观察的结果</span></h2>
+        <p>文章里有一句话让我停了下来：他们现在的大部分 review，发生在 PR 创建之前。</p>
+        <p>我原来容易把 review 理解成一个固定环节：写完代码，提交 PR，再请别人检查。后来才意识到，开发者自己检查改动、运行测试、实际操作页面，以及请独立的 Agent 阅读代码，都可以提前完成。</p>
+        <p>PR 是团队协作的入口。到了这个入口时，改动应该已经带着一些可以被检查的证据。</p>
+        <p>比如修改按钮之后，能看到实际点击后的页面变化；修复存储问题之后，能检查数据最终处于什么状态。Agent 的说明可以帮助理解，但“已经完成”这句话本身，提供不了多少验证价值。</p>
+        <p>这里又能接上我此前看到的一种观点：<strong>能够明确判断的检查，尽量交给工具执行。</strong></p>
+        <p>如果每次都让模型阅读一批结果、逐条判断是否正确，成本很高，也容易波动。把确定的判断写进脚本，之后就可以反复运行，模型主要负责调查失败和处理不确定的部分。</p>
+        <p>CLI、脚本和测试用例也可以组合起来。测试用例描述场景与预期，CLI 提供执行入口。一个脚本如果包含准备、操作和断言，它就在做测试；如果只是打印日志，那么判断工作仍然留在外面。</p>
+        <p>我想逐渐建立的，就是这种反馈：Agent 写完之后，能运行一个检查，并根据实际结果继续修正。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="failure-path">
+        <h2 id="failure-path"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>二、沿着故障路径选择测试</span></h2>
+        <p>不过，有检查入口还不够。Agent 很容易写出一大堆测试，真正重要的问题却没有覆盖到。</p>
+        <p>这次讨论里，我很认可一个原则：</p>
+        <p><strong>同一个风险，在哪一层最容易被可靠地观察，就优先在那里验证。</strong></p>
+        <p>假设要求是“切换深色模式后，刷新仍然保持选择”。仅仅检查保存配置的函数被调用了，并不能证明这个要求成立。配置可能没有正确写入，页面也可能没有正确读取。用浏览器切换、刷新，再检查页面，能更直接地观察到结果。</p>
+        <p>如果要验证的是一个排序公式，直接给函数输入数据、检查输出，通常就足够了。</p>
+        <p>选择测试方式时，我现在会先问：这个错误是怎么发生的？测试必须保留哪些真实环节，才能让它有机会发生？</p>
+        <p>问题出在数据库事务，就需要保留真实的事务行为。把数据库完全 mock 掉，可能顺手把出错的机制也移除了。</p>
+        <p>这个角度也能帮助识别冗余测试。有些测试详细规定内部函数的调用次数和顺序，稍微调整实现就失败，但用户看到的行为并没有变化。它保护的可能只是当前写法。</p>
+        <p>我更关心的是：这条测试对应什么真实风险？如果故意引入那个错误，它能发现吗？</p>
+        <p>防御性代码也可以这样审查。一个额外判断或者异常捕获，应该说得清楚它在处理什么可达的问题。尤其需要留意那些把失败悄悄变成空结果的代码——程序看起来继续运行了，真正的问题却被藏了起来。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="independent-review">
+        <h2 id="independent-review"><img class="post-section-mark" src="../assets/waymarks/trail-flag.svg" width="48" height="52" alt="" aria-hidden="true"><span>三、独立审查：共享事实，独立判断</span></h2>
+        <p>实现者检查自己的代码，总会受到已有思路的影响。某个前提一旦被接受，后续实现和测试就可能一直围绕它展开。</p>
+        <p>所以，使用新上下文的审查者很有价值。但这又带来一个问题：不给上下文，它怎么知道需求？把开发过程全部交给它，它会不会也被带着走？</p>
+        <p>我比较认可的做法，是让它共享必要事实，同时保留重新判断的空间。</p>
+        <p>审查者需要原始需求、验收条件、项目约定、实际 diff 和检查结果，也需要能够继续查看相关代码。</p>
+        <p>至于实现者那段很长的“为什么这样做，以及已经考虑了哪些情况”，可以等审查者形成初步判断后，再用于解释疑问。</p>
+        <p>独立审查的价值，在于它有机会重新检查那些已经被默认接受的前提。</p>
+        <p>当然，另一个 Agent 提出的意见也需要证据。它应该指出具体位置、可触发的条件和实际影响。仅凭一个名字觉得可疑，或者泛泛地说“以后可能出问题”，还不足以要求增加代码。</p>
+        <p>“没有发现需要修复的问题”，也应该是一个正常结果。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="review-convergence">
+        <h2 id="review-convergence"><img class="post-section-mark" src="../assets/waymarks/footsteps.svg" width="48" height="52" alt="" aria-hidden="true"><span>四、审查要让问题逐步收敛</span></h2>
+        <p>文章里有个例子让我印象很深：Agent 作者和 Agent 审查者，可能反复修改几十轮。</p>
+        <p>每一轮看起来都在认真工作，整个任务却迟迟结束不了。</p>
+        <p>文章把这个问题称为 review 必须 converge，也就是收敛。我把它理解为：随着审查推进，剩余问题应该逐渐减少，修改范围应该逐渐明确，最终走向可以接受的结果。</p>
+        <p>如果每一轮都不断增加要求、扩展范围，就值得停下来检查方向。</p>
+        <p>这在 Agent 场景下尤其重要。人可能很快略过一条价值不高的建议，Agent 却可能认真修改，再提交，再触发一轮审查。</p>
+        <p>所以，审查意见本身也需要被判断：这是实际缺陷吗？由本次改动引入吗？修复收益值得新增这些复杂度吗？是否又提出了已经讨论过的问题？</p>
+        <p>同一类错误也应该尽量一次说明白，让实现者检查相关位置。逐行、逐轮地发现同一种问题，会把一次修复拖成很多轮。</p>
+        <p>设置轮次上限的意义，是提醒我们重新检查需求、方案和审查标准。持续忙碌，并不代表持续接近完成。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="accountable-loop">
+        <h2 id="accountable-loop"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>五、把自动化接成有责任边界的闭环</span></h2>
+        <p>读到这里，我之前想到的“Issue → Agent → PR”才逐渐具体起来。</p>
+        <p>现成的编码 Agent 可以承担执行者，但流程仍然需要几样基础：清楚的任务、可用的环境、项目约定、检查入口，以及明确的交付边界。</p>
+        <p>简短的项目说明，可以告诉 Agent 去哪里找资料、运行什么命令。审查说明则可以强调，这个项目最容易出现什么错误，什么样的问题值得报告。</p>
+        <p>如果某种问题反复出现，而且规则已经足够明确，就可以考虑把它做成 lint 或脚本。需要判断的部分留给人和模型，重复检查交给工具。</p>
+        <p>人的注意力则应该随风险分配。修改文案和修改权限控制，值得投入不同的审查力度。判断依据来自实际改动及其影响。</p>
+        <p>Agent 可以协助检查，但需要人承担的判断和责任，仍然需要有人接住。一次批准也只覆盖当时看到的代码，后续新增的修改需要重新确认。</p>
+        <p>对我自己的项目来说，可以先从一个小闭环开始：写清需求和验收，给 Agent 一个能运行的检查入口，再让独立上下文的审查者检查改动。</p>
+        <p>然后观察它究竟发现了多少真实问题，又制造了多少无效修改。</p>
+        <p>我希望逐渐掌握的，是判断哪些结果值得相信，哪些问题需要继续追问，以及什么时候，这次改动已经足够好了。</p>
+      </section>
+        </div>
+        <figure class="post-illustration" data-post-image-slot hidden></figure>
+        <nav class="post-pagination" aria-label="前后文章">
+          <div class="post-neighbor post-neighbor--prev post-neighbor--empty"><span>上一篇</span><strong>暂无上一篇</strong></div>
+          <a class="post-list-link" href="../articles.html"><svg class="post-list-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7 5 3 9l4 4M3.5 9H12c4.5 0 5 3.5 3 6" /></svg><span class="post-list-label">返回文章列表<svg class="post-list-ink" viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 5C30 3 68 7 116 4" /><path class="post-list-echo" d="M12 9C43 7 77 10 106 8" /></svg></span></a>
+          <a class="post-neighbor post-neighbor--next" href="frontend-motion-vocabulary.html" rel="next"><span>下一篇</span><strong>前端动效词典：把名字和效果放在一起</strong></a>
+        </nav>
+      </article>
+      <aside class="post-sidebar post-toc--desktop" aria-labelledby="post-toc-title">
+        <div class="post-sidebar-inner">
+          <h2 id="post-toc-title">这一页的目录</h2>
+          <nav aria-labelledby="post-toc-title"><ol>
+<li><a href="#observable-evidence">一、信任来自可观察的结果</a></li>
+<li><a href="#failure-path">二、沿着故障路径选择测试</a></li>
+<li><a href="#independent-review">三、独立审查：共享事实，独立判断</a></li>
+<li><a href="#review-convergence">四、审查要让问题逐步收敛</a></li>
+<li><a href="#accountable-loop">五、把自动化接成有责任边界的闭环</a></li>
+          </ol></nav>
+        </div>
+      </aside>
+    </main>
+    <footer class="site-footer"><a class="footer-brand" href="../index.html">LYW Station</a><a class="site-filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026096103号-1</a><nav class="footer-social" aria-label="社交链接"><a class="footer-social-link" href="https://github.com/drunk-cat423" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 18.5c-3.7 1.1-3.7-1.8-5.2-2.2m10.4 4v-2.8c0-.8.1-1.4-.4-1.9 3.2-.4 6.5-1.6 6.5-7.2a5.6 5.6 0 0 0-1.5-3.9 5.2 5.2 0 0 0-.1-3.9s-1.2-.4-4 1.5a13.8 13.8 0 0 0-7.3 0C3.6.2 2.4.6 2.4.6a5.2 5.2 0 0 0-.1 3.9A5.6 5.6 0 0 0 .8 8.4c0 5.6 3.3 6.8 6.5 7.2-.4.4-.5 1-.4 1.9v2.8"/></svg><span>GitHub</span></a><button class="footer-social-link footer-social-link--disabled" type="button" disabled aria-label="RSS 稍后开放" title="RSS 稍后开放"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="19" r="1.2"/><path d="M4 11a9 9 0 0 1 9 9M4 5a15 15 0 0 1 15 15"/></svg><span>RSS</span></button></nav><div class="post-reading-tools">
+      <div class="reading-progress" data-reading-progress role="progressbar" aria-label="文章阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
+        <svg viewBox="0 0 46 46" aria-hidden="true" focusable="false"><circle class="reading-progress-track" cx="23" cy="23" r="20"/><circle class="reading-progress-arc" cx="23" cy="23" r="20" pathLength="100"/></svg>
+        <span data-reading-percent>0%</span>
+      </div>
+      <a class="footer-back-top" href="#top">回到顶部 ↑</a>
+    </div></footer>
+  </div>
+</body>
+</html>

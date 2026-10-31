@@ -100,9 +100,11 @@ function estimateReadMinutes(article) {
 function renderParagraph(paragraph) {
   const codeBlock = /^```(?:text)?\n([\s\S]*?)\n```$/.exec(paragraph);
   if (codeBlock) return `<pre><code>${escapeHTML(codeBlock[1])}</code></pre>`;
-  const content = paragraph.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*)/g).map((part) => {
+  const content = paragraph.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\))/g).map((part) => {
     if (part.startsWith('`') && part.endsWith('`')) return `<code>${escapeHTML(part.slice(1, -1))}</code>`;
     if (part.startsWith('**') && part.endsWith('**')) return `<strong>${escapeHTML(part.slice(2, -2))}</strong>`;
+    const link = /^\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)$/.exec(part);
+    if (link) return `<a href="${escapeHTML(link[2])}">${escapeHTML(link[1])}</a>`;
     return escapeHTML(part);
   }).join('');
   return `<p>${content}</p>`;
@@ -191,7 +193,7 @@ function renderArticle(article, index) {
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
   <link rel="stylesheet" href="../article.css?v=20261018-reading-waymarks">
-  <script type="module" src="../site.js?v=20261029-theme-nav" async></script>
+  <script type="module" src="../site.js?v=20261031-agent-review" async></script>
 ${animationScript}${demoAssets}  <link rel="stylesheet" href="../theme.css?v=20261029-dark-names">
 </head>
 <body data-page="post">
