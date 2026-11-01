@@ -28,6 +28,12 @@ cp -R skills/personal-blog/. "${CODEX_HOME:-$HOME/.codex}/skills/personal-blog/"
 
 若已对目标 Skill 做过本机修改，先比较后再同步。安装后在新会话中使用 `$personal-blog`，例如：“用 `$personal-blog`，把这次项目讨论整理成我的博客，先给我看看。”提交与部署仍以当次授权为准。
 
+## 博客草稿
+
+待审阅文章保存在 `docs/drafts/`，元数据记录日期、分类和草稿状态；审阅后再按内容更新流程集成到站点。
+
+- 2026-11-01 · 技术 · [读完 Super-agent，我开始重新思考 bot 的交互方式](docs/drafts/2026-11-01-super-agent-reading.md)
+
 ## 本地运行
 
 预览静态页面需要 Node.js 18 或更新版本。在项目根目录运行：
