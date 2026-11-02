@@ -1,4 +1,4 @@
-import { articles, works, messages } from './content.js?v=20261102-super-agent-reading';
+import { articles, works, messages } from './content.js?v=20261102-super-agent-comments';
 import { setupPoseScene } from './scene-player.js?v=20261010-pose-player';
 import { createCommentAvatar } from './comment-avatars.js?v=20261010-avatar-icons';
 

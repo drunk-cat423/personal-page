@@ -19,6 +19,15 @@ function escapeHTML(value) {
   })[char]);
 }
 
+function isHttpsSourceURL(value) {
+  if (typeof value !== 'string' || !value.trim()) return false;
+  try {
+    return new URL(value).protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 function versionSceneAsset(value) {
   if (!value.includes('/assets/illustrations/web/')) return value;
   if (/[?&]v=20261010-scene-lite(?:&|#|$)/.test(value)) return value;
@@ -84,11 +93,14 @@ function validateArticles(items) {
         const figure = section.figure;
         if (!figure || !Number.isInteger(figure.afterParagraph)
           || figure.afterParagraph < 0 || figure.afterParagraph >= section.paragraphs.length
-          || typeof figure.src !== 'string' || !/^\.\.\/assets\/diagrams\/super-agent\/[a-z0-9]+(?:-[a-z0-9]+)*\.svg$/.test(figure.src)
+          || typeof figure.src !== 'string' || !/^\.\.\/assets\/diagrams\/super-agent\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:svg|png|jpg)$/.test(figure.src)
           || typeof figure.alt !== 'string' || !figure.alt.trim()
           || typeof figure.caption !== 'string' || !figure.caption.trim()
           || !Number.isInteger(figure.width) || figure.width <= 0
           || !Number.isInteger(figure.height) || figure.height <= 0
+          || (figure.source !== undefined && (!figure.source
+            || typeof figure.source.label !== 'string' || !figure.source.label.trim()
+            || !isHttpsSourceURL(figure.source.url)))
           || !existsSync(path.resolve(postsDir, figure.src))) {
           throw new Error(`Section figure is invalid in ${article.id}#${section.id}`);
         }
@@ -157,10 +169,13 @@ function renderAnimation(animation) {
 
 function renderFigure(figure) {
   const src = escapeHTML(figure.src);
+  const source = figure.source
+    ? `<a href="${escapeHTML(figure.source.url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(figure.source.label)}</a>`
+    : '';
   return `
         <figure class="post-diagram">
           <a class="post-diagram-link" href="${src}" target="_blank" rel="noopener noreferrer"><img src="${src}" width="${figure.width}" height="${figure.height}" loading="lazy" decoding="async" alt="${escapeHTML(figure.alt)}"></a>
-          <figcaption><span>${escapeHTML(figure.caption)}</span><span>点击配图可放大查看</span></figcaption>
+          <figcaption><span>${escapeHTML(figure.caption)}</span><span>点击配图可放大查看</span>${source}</figcaption>
         </figure>`;
 }
 
@@ -215,7 +230,7 @@ function renderArticle(article, index) {
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
   <link rel="stylesheet" href="../article.css?v=20261102-static-diagrams">
-  <script type="module" src="../site.js?v=20261102-super-agent-reading" async></script>
+  <script type="module" src="../site.js?v=20261102-super-agent-comments" async></script>
 ${animationScript}${demoAssets}  <link rel="stylesheet" href="../theme.css?v=20261029-dark-names">
 </head>
 <body data-page="post">
