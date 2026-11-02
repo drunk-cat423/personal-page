@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { articles } from '../content.js';
@@ -80,6 +80,19 @@ function validateArticles(items) {
           throw new Error(`Section animation is invalid in ${article.id}#${section.id}`);
         }
       }
+      if (section.figure !== undefined) {
+        const figure = section.figure;
+        if (!figure || !Number.isInteger(figure.afterParagraph)
+          || figure.afterParagraph < 0 || figure.afterParagraph >= section.paragraphs.length
+          || typeof figure.src !== 'string' || !/^\.\.\/assets\/diagrams\/super-agent\/[a-z0-9]+(?:-[a-z0-9]+)*\.svg$/.test(figure.src)
+          || typeof figure.alt !== 'string' || !figure.alt.trim()
+          || typeof figure.caption !== 'string' || !figure.caption.trim()
+          || !Number.isInteger(figure.width) || figure.width <= 0
+          || !Number.isInteger(figure.height) || figure.height <= 0
+          || !existsSync(path.resolve(postsDir, figure.src))) {
+          throw new Error(`Section figure is invalid in ${article.id}#${section.id}`);
+        }
+      }
       if (section.demo !== undefined && (!section.demo || section.demo.id !== 'motion-vocabulary'
         || !Number.isInteger(section.demo.afterParagraph) || section.demo.afterParagraph < 0
         || section.demo.afterParagraph >= section.paragraphs.length)) {
@@ -118,7 +131,7 @@ function renderSections(article) {
   const body = article.sections.map((section, sectionIndex) => `
       <section class="post-section" aria-labelledby="${escapeHTML(section.id)}">
         <h2 id="${escapeHTML(section.id)}"><img class="post-section-mark" src="../assets/waymarks/${waymarks[sectionIndex % waymarks.length]}.svg" width="48" height="52" alt="" aria-hidden="true"><span>${escapeHTML(section.title)}</span></h2>
-${section.paragraphs.map((paragraph, index) => `        ${renderParagraph(paragraph)}${section.animation?.afterParagraph === index ? renderAnimation(section.animation) : ''}${section.demo?.afterParagraph === index ? renderMotionDemo() : ''}`).join('\n')}
+${section.paragraphs.map((paragraph, index) => `        ${renderParagraph(paragraph)}${section.animation?.afterParagraph === index ? renderAnimation(section.animation) : ''}${section.figure?.afterParagraph === index ? renderFigure(section.figure) : ''}${section.demo?.afterParagraph === index ? renderMotionDemo() : ''}`).join('\n')}
       </section>`).join('\n');
   return { toc, body };
 }
@@ -139,6 +152,15 @@ function renderAnimation(animation) {
               <button type="button" data-animation-replay hidden>重播</button>
             </span>
           </figcaption>
+        </figure>`;
+}
+
+function renderFigure(figure) {
+  const src = escapeHTML(figure.src);
+  return `
+        <figure class="post-diagram">
+          <a class="post-diagram-link" href="${src}" target="_blank" rel="noopener noreferrer"><img src="${src}" width="${figure.width}" height="${figure.height}" loading="lazy" decoding="async" alt="${escapeHTML(figure.alt)}"></a>
+          <figcaption><span>${escapeHTML(figure.caption)}</span><span>点击配图可放大查看</span></figcaption>
         </figure>`;
 }
 
@@ -192,8 +214,8 @@ function renderArticle(article, index) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
-  <link rel="stylesheet" href="../article.css?v=20261018-reading-waymarks">
-  <script type="module" src="../site.js?v=20261031-agent-review" async></script>
+  <link rel="stylesheet" href="../article.css?v=20261102-static-diagrams">
+  <script type="module" src="../site.js?v=20261102-super-agent-reading" async></script>
 ${animationScript}${demoAssets}  <link rel="stylesheet" href="../theme.css?v=20261029-dark-names">
 </head>
 <body data-page="post">

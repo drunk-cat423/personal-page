@@ -4,7 +4,9 @@ date: 2026-11-01
 updated: 2026-11-02
 category: tech
 categoryName: 技术
-status: draft
+status: published
+published: 2026-11-02
+url: https://linyouwei.top/posts/super-agent-reading.html
 source: https://mp.weixin.qq.com/s/zoS7GlReWPhfCjENGxXCdg
 ---
 
@@ -28,7 +30,7 @@ source: https://mp.weixin.qq.com/s/zoS7GlReWPhfCjENGxXCdg
 
 这些调查和规划仍然由 Worker 完成。一个 Worker 要读日志、查代码、形成假设、决定修改方案、运行验证，它承担的是一个完整问题的解决过程。如果任务足够复杂，它内部还可以继续使用子 Agent，把明确的实现步骤交给其他执行者。
 
-![Router 负责分派与协调，Worker 在独立任务中完成调查、规划、实现和验证](assets/super-agent/router-workers.svg)
+![Router 负责分派与协调，Worker 在独立任务中完成调查、规划、实现和验证](../../assets/diagrams/super-agent/router-workers.svg)
 
 *图 1：逻辑职责示意。具体任务内部的复杂规划仍然发生在 Worker 中，因此可以在 Worker 内部继续组合强模型规划与子任务委派。*
 
@@ -66,7 +68,7 @@ Router 主要读取事件和上下文，生成相对简短的决定。合并事�
 
 用户在群里问“刚才那个修复评审通过了吗”，Router 可以从当前消息找到所属 Thread，沿着关联找到修复任务的 Worker，再找到对应的 PR Thread，读取评审进展。它需要的是一条有意义的检索路径，无须提前读入所有历史任务。
 
-![通过对象 ID 从当前消息逐跳找回相关讨论、Worker 和 PR；摘要与完整资料分开提供](assets/super-agent/context-recall.svg)
+![通过对象 ID 从当前消息逐跳找回相关讨论、Worker 和 PR；摘要与完整资料分开提供](../../assets/diagrams/super-agent/context-recall.svg)
 
 *图 2：按需召回的关系与读取路径示意，不代表原型的真实字段定义。每次返回少量相关信息，并保留继续读取的入口。*
 
@@ -96,7 +98,7 @@ Trigger 的保留同样应该区分用途。它退出待处理队列后，仍然
 
 比如测试还在运行，用户又要求构建项目，系统可以再启动第二个后台任务。它们分别保存状态，前台继续接收消息。如果构建依赖测试成功，则让调度系统维护这个依赖，测试完成后再启动构建。需要等待的是那个依赖步骤，整个对话仍然可以处理其他事情。
 
-![同步调用与异步调用的时序对照：后台测试持续时，前台仍能处理新消息](assets/super-agent/async-loop.svg)
+![同步调用与异步调用的时序对照：后台测试持续时，前台仍能处理新消息](../../assets/diagrams/super-agent/async-loop.svg)
 
 *图 3：时序仅作机制示意。异步接口返回启动结果，最终结果另行投递；新输入在推理步边界处理，不表示同一个模型会话同时进行两次推理。*
 
