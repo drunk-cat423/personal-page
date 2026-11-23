@@ -83,11 +83,18 @@ Kafka 也有自己的事务。如果我的处理过程是从 Kafka 读，再把�
 
 ## 如果挂掉的是 Kafka 自己呢？
 
-运行 Kafka 的服务进程叫 **Broker**。同一个 Topic 的分区可以放在不同的 Broker 上。一个分区也可以存好几份，比如分区 0 由 Broker 1 接收写入，Broker 2 跟着复制。分区 1 则由 Broker 2 接收写入，Broker 3 跟着复制。
+运行 Kafka 的服务进程叫 **Broker**。如果把 Topic 看成「订单消息」这一类记录，Partition 就是其中的一条日志，Broker 则是实际存放、提供这些日志的服务。一台 Broker 可以存好几个分区。同一个分区也可以在不同 Broker 上各存一份。
 
-对一个分区来说，负责接收写入的副本叫 **Leader**，跟着复制的叫 **Follower**。这里每个分区各有两份副本，Broker 3 只存了分区 1 的那份。**副本数说的是每个分区存几份，具体哪台机器存哪份，要看副本怎么分配。**
+拿两个分区、三台 Broker 来看。每个分区存两份，所以这里的**副本因子是 2**。这两份里，有一份接收生产者写入，叫 **Leader**。另一份叫 **Follower**，平时主动去 Leader 那里拉取新消息，按相同的顺序和 offset 存下来。两份存的是同一个分区的消息，Follower 刚好还没拉到日志尾部时，会暂时落后一点。 [Apache Kafka 复制设计](https://kafka.apache.org/41/design/design/)
 
-如果 Broker 2 挂了，分区 0 失去的是跟着复制的那份，分区 1 失去的是 Leader。如果 Broker 3 上的副本符合正常选举条件，就可以接手分区 1。Kafka 用 **ISR** 记录哪些副本保持同步。要是眼下没有合格的副本，分区就可能暂时无法写入。 [Apache Kafka 复制设计](https://kafka.apache.org/41/design/design/)
+- 分区 0 放在 Broker 1 和 Broker 2 上。Broker 1 是 Leader，Broker 2 跟着复制。
+- 分区 1 放在 Broker 2 和 Broker 3 上。Broker 2 是 Leader，Broker 3 跟着复制。
+
+这样一来，Broker 2 在两个分区里的角色不同。**它挂掉时，分区 0 少了一个 Follower，原来的 Leader 还在。分区 1 失去了 Leader，需要重新选一个。** 如果 Broker 3 上的那份副本仍在线，也符合选举条件，负责管理分区状态的 Controller 就可以把它选为分区 1 的新 Leader，客户端随后就能去 Broker 3 找这个分区。
+
+Kafka 用 **ISR（同步副本集合）** 记录哪些副本还保持同步。Follower 落后太久，会被移出 ISR。选新 Leader 时，Kafka 优先从仍可用的 ISR 副本里选。如果没有任何符合条件的副本，分区就得等，不能立刻恢复。出故障的副本恢复后，可以从当前的 Leader 补数据，重新达到同步条件后再回到 ISR。 [Apache Kafka 复制设计](https://kafka.apache.org/41/design/design/) · [Kafka 副本选举规则](https://kafka.apache.org/43/operations/eligible-leader-replicas/)
+
+这里还有个容易想错的地方。**选出了 Leader，后续写入仍然要满足副本确认条件。** 比如配置 `acks=all`，并要求至少有两份同步副本（`min.insync.replicas=2`）。上面每个分区原本只有两份，Broker 2 一挂，分区 0 和分区 1 都只剩一份，即使有 Leader，也都无法按这个条件确认新写入。如果每个分区原本有三份，掉一台后还有两份保持同步，就能满足这条要求。 [Apache Kafka Topic 副本配置](https://kafka.apache.org/40/configuration/topic-level-configs/)
 
 ## `send()` 以后，什么时候才算写进 Kafka？
 
@@ -112,6 +119,20 @@ Kafka 也有自己的事务。如果我的处理过程是从 Kafka 读，再把�
 一种做法是在保存订单时，顺手在同一个数据库的「待发送」表里写一行，记下 `evt-501` 和要发的内容。订单与待发消息在同一个事务里提交。下单程序就算随后挂了，后台发送程序也能从表里找到这行，发给 Kafka。这就是 **Transactional Outbox（事务发件箱）**。 [Debezium Outbox 文档](https://debezium.io/documentation/reference/transformations/outbox-event-router.html)
 
 后台程序也可能在发成功之后、标记已发送之前挂掉。它重启后还会看到同一行，可能再发一次。所以这里两头得接上。发件箱让我重启后还找得到要发的消息。库存程序每次看到 `evt-501`，都能查自己是不是已经扣过。
+
+## 谁挂了，靠什么接着跑？
+
+前面几次都说到「接手」，但具体接手的东西不同。我把它们放回同一笔订单里看，从谁先停下来开始判断。
+
+- **库存组里有一个消费者挂了。** 假如 B 一直在读分区 1，Kafka 确认 B 离组后，会通过再均衡把分区 1 分给同组还在的成员，比如 A。A 从库存组已经提交的 offset 继续读。B 最后处理过但还没提交的那条订单，A 可能会再读一次，所以库存程序要能按事件编号去重。
+- **整个通知组都停了。** 这时没有组员能接手，通知暂时没人发。订单消息还会留在 Kafka 里，库存组也可以照常读。通知程序恢复后，只要原来的提交位置和对应的消息还在，就能从上次的位置把积压补上。
+
+- **存消息的 Broker 挂了。** Kafka 按分区处理。Leader 还在的分区只少了一份副本；丢了 Leader 的分区要从合格的副本中选一个接手。选完还要看剩下的同步副本够不够，决定能否继续接受新写入。
+
+- **生产者发出了消息，回信却没到。** 遇到可重试的错误，且还没超过发送时限，生产者可以自动重试。开启生产者幂等后，Kafka 可以认出是同一次发送。要是应用自己重新发送同一件事，就要保留原来的 `eventId`，让下游能认出它。
+- **下单程序把订单存好了，还没发消息就挂了。** 这时得靠事务发件箱。因为待发事件和订单一起存进了数据库，后台发送程序才能找回来，继续发给 Kafka。
+
+以后看到一笔订单卡住，我会顺着它走过的地方查。先看订单库里有没有待发记录，发出后有没有收到确认，Kafka 上的分区能不能读写，最后再看消费组有没有人接着读。
 
 ## 真要用起来，我要启动什么？
 

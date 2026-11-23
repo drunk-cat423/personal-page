@@ -13,8 +13,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
-  <link rel="stylesheet" href="../article.css?v=20261123-article-tables">
-  <script type="module" src="../site.js?v=20261123-kafka-rebalance" async></script>
+  <link rel="stylesheet" href="../article.css?v=20261123-diagram-dialog">
+  <script type="module" src="../site.js?v=20261123-kafka-recovery" async></script>
+  <script type="module" src="../post-diagrams.js?v=20261123-dialog"></script>
   <link rel="stylesheet" href="../theme.css?v=20261029-dark-names">
 </head>
 <body data-page="post">
@@ -59,8 +60,8 @@
         <p>文章中的 Router 管理的是多个完整任务之间的分派。它把“修复登录故障”和“排查部署失败”识别为两个任务，分别交给 Worker；后续收到补充信息或叫停请求，再判断应该送到哪里。它不负责把登录故障拆成“查连接池、修改配置、补测试”等具体步骤。</p>
         <p>这些任务内部的调查和规划仍然由 Worker 完成。登录 Worker 需要读日志和代码、定位原因、设计修复方案，再实现和验证。<strong>这里的 Worker 已经包含了规划与执行，不能把它直接对应成前一种分层里只负责写代码的小模型。</strong> 因此，外层 Router 可以较轻，负责完整任务的 Worker 反而需要较强的解决问题能力。</p>
         <figure class="post-diagram">
-          <a class="post-diagram-link" href="../assets/diagrams/super-agent/official-router-workers.jpg" target="_blank" rel="noopener noreferrer"><img src="../assets/diagrams/super-agent/official-router-workers.jpg" width="935" height="303" loading="lazy" decoding="async" alt="原文双层架构：Router 统一承接不同信道，多个 Worker 在隔离上下文中执行任务"></a>
-          <figcaption><span>图 1：原文的 Router / Worker 双层架构。</span><span>点击配图可放大查看</span><a href="https://mp.weixin.qq.com/s/zoS7GlReWPhfCjENGxXCdg" target="_blank" rel="noopener noreferrer">图源：DeepSeek Harness 团队原文</a></figcaption>
+          <img src="../assets/diagrams/super-agent/official-router-workers.jpg" width="935" height="303" loading="lazy" decoding="async" alt="原文双层架构：Router 统一承接不同信道，多个 Worker 在隔离上下文中执行任务">
+          <figcaption><span>图 1：原文的 Router / Worker 双层架构。</span><a href="https://mp.weixin.qq.com/s/zoS7GlReWPhfCjENGxXCdg" target="_blank" rel="noopener noreferrer">图源：DeepSeek Harness 团队原文</a></figcaption>
         </figure>
         <p>所以，两种方案的模型选择并不冲突：它们划分的是不同范围内的工作。一个 Worker 内部还可以由强模型制定方案，再把明确的编码步骤交给子 Agent。<strong>选模型时要先看这个节点究竟负责路由、复杂规划，还是按确定方案实现，再判断它需要多强的能力。</strong> 如果 Router 也开始承担复杂的跨任务依赖和优先级安排，它的模型需求当然会变化。</p>
       </section>
@@ -91,8 +92,8 @@
         <p>我先把这三种对象区分开：Trigger 是一次具体事件，例如一条群消息或一条 PR 评论；Thread 是一串相关事件，例如一个话题、一个 PR 的讨论；Worker Session 是处理任务的执行会话。Thread 并不一定已经有 Worker：它可能还没被分派，也可能不需要处理。同样，Thread 与 Worker 之间可以存在多对多的订阅关系。</p>
         <p>用户在群里问“刚才那个修复评审通过了吗”，Router 可以从当前消息找到所属 Thread，沿着关联找到修复任务的 Worker，再找到对应的 PR Thread，读取评审进展。它需要的是一条有意义的检索路径，无须提前读入所有历史任务。</p>
         <figure class="post-diagram">
-          <a class="post-diagram-link" href="../assets/diagrams/super-agent/official-context-recall.jpg" target="_blank" rel="noopener noreferrer"><img src="../assets/diagrams/super-agent/official-context-recall.jpg" width="1052" height="262" loading="lazy" decoding="async" alt="原文链式召回图：Trigger 内联摘要与关联 ID，工具读取 Thread、Worker 和其他 Thread 的详情"></a>
-          <figcaption><span>图 2：原文的链式召回示意，每次读取都保留继续展开的关联入口。</span><span>点击配图可放大查看</span><a href="https://mp.weixin.qq.com/s/zoS7GlReWPhfCjENGxXCdg" target="_blank" rel="noopener noreferrer">图源：DeepSeek Harness 团队原文</a></figcaption>
+          <img src="../assets/diagrams/super-agent/official-context-recall.jpg" width="1052" height="262" loading="lazy" decoding="async" alt="原文链式召回图：Trigger 内联摘要与关联 ID，工具读取 Thread、Worker 和其他 Thread 的详情">
+          <figcaption><span>图 2：原文的链式召回示意，每次读取都保留继续展开的关联入口。</span><a href="https://mp.weixin.qq.com/s/zoS7GlReWPhfCjENGxXCdg" target="_blank" rel="noopener noreferrer">图源：DeepSeek Harness 团队原文</a></figcaption>
         </figure>
         <p>我在这里连续追问了几个关系问题。首先，链接并不要求两两存在。Trigger 关联某个 Thread 和 Worker，不能单凭这两条边，就推断 Thread 与 Worker 必须有另一条直接链接；这要由实际的归属、订阅或处理关系决定。一个 Worker 同时关联群聊 Thread 和 PR Thread，也不要求两个 Thread 再直接互相链接，通过 Worker 已经可以找到彼此。</p>
         <p>其次，能从 Thread 1 经 Worker 找到 Thread 2，不代表反向必然可达。实际关系可能存在，但读取接口未必暴露全部反向引用。甚至某次返回只 Inline 了部分关联，剩余关系还需要继续查询。因此，“本次结果没显示”与“系统里没有这条关系”也要分开看。</p>
@@ -113,8 +114,8 @@
         <p>文章中的异步方式把接口改成启动任务：调用 <code>start()</code> 后，先返回“已启动”和任务标识；命令在后台运行，最终结果稍后作为新事件进入会话。工具调用先完成了启动这一步，前台就不必一直等着命令结束。</p>
         <p>比如测试还在运行，用户又要求构建项目，系统可以再启动第二个后台任务。它们分别保存状态，前台继续接收消息。如果构建依赖测试成功，则让调度系统维护这个依赖，测试完成后再启动构建。需要等待的是那个依赖步骤，整个对话仍然可以处理其他事情。</p>
         <figure class="post-diagram">
-          <a class="post-diagram-link" href="../assets/diagrams/super-agent/official-async-loop.jpg" target="_blank" rel="noopener noreferrer"><img src="../assets/diagrams/super-agent/official-async-loop.jpg" width="1047" height="456" loading="lazy" decoding="async" alt="原文经典与异步 ReAct Loop 对比：start 返回 Started，后台执行期间继续处理用户消息"></a>
-          <figcaption><span>图 3：原文的同步 / 异步 ReAct Loop 时序对比。</span><span>点击配图可放大查看</span><a href="https://mp.weixin.qq.com/s/zoS7GlReWPhfCjENGxXCdg" target="_blank" rel="noopener noreferrer">图源：DeepSeek Harness 团队原文</a></figcaption>
+          <img src="../assets/diagrams/super-agent/official-async-loop.jpg" width="1047" height="456" loading="lazy" decoding="async" alt="原文经典与异步 ReAct Loop 对比：start 返回 Started，后台执行期间继续处理用户消息">
+          <figcaption><span>图 3：原文的同步 / 异步 ReAct Loop 时序对比。</span><a href="https://mp.weixin.qq.com/s/zoS7GlReWPhfCjENGxXCdg" target="_blank" rel="noopener noreferrer">图源：DeepSeek Harness 团队原文</a></figcaption>
         </figure>
         <p>这时我想到了子 Agent：主 Agent 把工作交出去，看上去也能让后台继续运行。两者的差别最后落在等待方式上。主 Agent 如果委派后仍然等待子 Agent 的最终结果，前台流程仍可能被占住。后台即使有多个会话并行，也不自动获得前台异步交互。</p>
         <p>放到一个同时使用两种机制的例子里，就容易区分了。我让主 Agent 修复登录故障，它启动子 Agent A 负责读代码、排查和验证，启动接口先返回任务 ID。A 还在运行时，我又要求整理一份接口文档，主 Agent 可以接收这个请求，启动子 Agent B，并继续回答我的补充问题。之后 A、B 分别把结果作为完成事件送回来。</p>
@@ -189,5 +190,10 @@
       <a class="footer-back-top" href="#top">回到顶部 ↑</a>
     </div></footer>
   </div>
+  <dialog id="post-diagram-dialog" class="post-diagram-dialog" aria-label="配图预览">
+    <form method="dialog">
+      <button type="submit" aria-label="关闭配图预览" autofocus>×</button>
+    </form>
+  </dialog>
 </body>
 </html>
