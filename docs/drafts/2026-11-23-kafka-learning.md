@@ -61,9 +61,9 @@ Kafka 的 **Consumer Group（消费组）** 可以管这件事。A、B 用同一
 
 通知服务用另一个组名。库存组和通知组都能读分区 0，分别做自己的事。如果它们误用了同一个组名，Kafka 就会把它们当成一组来分工，结果可能是分区 0 的订单被库存读了，通知没读到。**同组分着读，跨组各自读。** [KafkaConsumer API](https://kafka.apache.org/44/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
 
-我还有个疑问。如果 Kafka 告诉 A「分区 1 也归你了」，A 等手里的消息处理完再去读，有什么问题？单纯多拿一个分区时，应用确实可以安排什么时候处理它。更棘手的是反过来的情况。A 手里还有分区 0 的消息没有处理完，分区 0 却马上要交给 B。B 能依靠的，是库存组**上次已经提交**的位置。A 如果刚扣完库存、还没提交，B 就可能把这条订单再读一遍。
+我还有个疑问。如果 Kafka 告诉 A「分区 1 也归你了」，A 能不能先处理完手头的消息，再去读分区 1？可以。真正需要协调的是分区 1 怎么从 B 手里交给 A。正常交接时，B 可以在交出分区前提交已经处理完的进度。要是 B 突然掉线，没有机会提交，A 接手后就从库存组上一次成功提交的位置继续读。 [Kafka 分区交接文档](https://kafka.apache.org/44/javadoc/org/apache/kafka/clients/consumer/ConsumerRebalanceListener.html)
 
-这种重新分工叫 **Rebalance（再均衡）**。一些旧的分配方式会先让整组停下来交接，增量方式可以只交接受影响的分区。对我来说，难点终于具体了。要交接的是分区，真正容易出错的是上一位处理者留下的最后一条消息。 [Apache Kafka 消费组再均衡协议](https://kafka.apache.org/40/operations/consumer-rebalance-protocol/)
+这种重新分配叫 **Rebalance（再均衡）**。有些分配方式会先收回组里所有分区，再重新分配。增量方式只需要交接归属变了的分区。比如这次只有分区 1 要从 B 转给 A，分区 0 一直归 A，A 就可以继续处理分区 0。至于接过来的分区 1，假如 B 已经扣了库存，却在提交进度前挂了，A 就可能把那笔订单再读一遍。 [Apache Kafka 消费组再均衡协议](https://kafka.apache.org/40/operations/consumer-rebalance-protocol/)
 
 ## 程序突然挂了，为什么库存可能多扣一双？
 
