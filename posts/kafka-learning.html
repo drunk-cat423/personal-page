@@ -7,7 +7,7 @@
   <script src="../page-transitions.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fdfefe">
-  <meta name="description" content="跟着一笔买鞋订单，弄清 Kafka 怎么存消息、消费组怎么分工，以及为什么程序重启后可能重复扣库存。">
+  <meta name="description" content="从一笔买鞋订单出发，我追问了分区怎样分工、程序挂掉后怎样接着读，以及 Kafka 能帮忙做到哪一步。">
   <title>我顺着一笔订单，弄懂了 Kafka 在做什么 · LYW Station</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,125 +30,204 @@
         <a class="post-back" href="../articles.html">← 返回文章列表</a>
         <header class="post-header">
           <h1 class="post-title">我顺着一笔订单，弄懂了 Kafka 在做什么</h1>
-          <p class="post-excerpt">跟着一笔买鞋订单，弄清 Kafka 怎么存消息、消费组怎么分工，以及为什么程序重启后可能重复扣库存。</p>
-          <div class="post-meta"><span class="post-category">技术</span><time datetime="2026-11-23">2026.11.23</time><span>约 16 分钟</span></div>
+          <p class="post-excerpt">从一笔买鞋订单出发，我追问了分区怎样分工、程序挂掉后怎样接着读，以及 Kafka 能帮忙做到哪一步。</p>
+          <div class="post-meta"><span class="post-category">技术</span><time datetime="2026-11-23">2026.11.23</time><span>约 25 分钟</span></div>
         </header>
         <details class="post-toc post-toc--mobile">
           <summary>这一页的目录</summary>
           <nav aria-label="文章目录"><ol>
 <li><a href="#why-kafka">下单成功，为什么还得等通知发完？</a></li>
-<li><a href="#reading-positions">一份流水，每组有自己的书签</a></li>
-<li><a href="#topics-and-partitions">为什么要把一个 Topic 切成几个 Partition？</a></li>
-<li><a href="#consumer-groups">开了三个库存程序，谁读哪一条？</a></li>
-<li><a href="#crash-between-steps">Kafka 里只有一条消息，库存却可能扣两次</a></li>
-<li><a href="#sending-and-outbox">订单存好了，消息还没发出去怎么办？</a></li>
-<li><a href="#brokers-and-replicas">如果是 Kafka 自己挂了呢？</a></li>
+<li><a href="#reading-positions">Kafka 到底把什么存下来了？</a></li>
+<li><a href="#payment-crash">看得到历史，为什么还是可能重复扣费？</a></li>
+<li><a href="#topics-and-partitions">如果从头设计，为什么不用多个 Topic 当分片？</a></li>
+<li><a href="#consumer-groups">为什么还需要 Consumer Group？</a></li>
+<li><a href="#rebalance">分区交给我了，为什么不能先做完手里的事？</a></li>
+<li><a href="#crash-between-steps">书签上写 999，重启究竟从哪里接？</a></li>
+<li><a href="#brokers-and-replicas">同一个 Topic，为什么能放在几台机器上？</a></li>
+<li><a href="#producer-acks">我调用了 send，Kafka 就收到消息了吗？</a></li>
+<li><a href="#producer-retry">回信丢了，重试到底会不会发出第二条？</a></li>
+<li><a href="#sending-and-outbox">如果程序刚存完订单，连 send 都没来得及调用？</a></li>
 <li><a href="#running-kafka">真要用起来，我得启动什么？</a></li>
           </ol></nav>
         </details>
         <div class="post-content">
-        <p>开始学以前，我只听说过 Kafka 这个名字。聊到后来，我还问了一个很实在的问题。「我写代码的时候，到底怎么用它？」就像用 MySQL，要先有个数据库服务在跑，我的程序才有地方连。<strong>Kafka 也是一个跑着等程序来连的服务。我的程序可以往里写消息，也可以从里面读消息。</strong></p>
-        <p>要弄懂什么时候会用它，我还是得回到《Kafka 101》里的订单例子。假如有人买了一双鞋，库存要少一双，通知要发一条。要做的事就这么几件，Kafka 来了以后，究竟帮了什么忙？ <a href="https://kafkaisfun.dev/learn/kafka-101">《Kafka 101》</a></p>
+        <p>我刚开始学 Kafka 时，只听过名字。我想先看看，平时写一个下单接口的时候，什么地方会冒出「这里也许需要 Kafka」这个念头。于是我们拿一双鞋来举例。有人买了鞋，系统得存订单、扣库存、发通知。讲到这里还挺简单，直到我问，<strong>如果银行已经扣了钱，支付程序却在记下结果之前挂了，Kafka 能帮我知道这笔钱扣过了吗？</strong></p>
+        <p>从这个问题往下，我才慢慢把不同的事分开。谁记着发生了什么，谁记着自己读到哪里，谁又能确认钱确实扣掉了？这篇文章就沿着当时的问题走一遍。</p>
       <section class="post-section" aria-labelledby="why-kafka">
         <h2 id="why-kafka"><img class="post-section-mark" src="../assets/waymarks/signpost.svg" width="48" height="52" alt="" aria-hidden="true"><span>下单成功，为什么还得等通知发完？</span></h2>
-        <p>假如我写了一个下单接口，代码里先存订单，再叫库存服务扣库存，最后等通知服务发完消息才返回。通知服务要是卡住，用户虽然已经下了单，页面上还在转圈。</p>
-        <p>加上 Kafka，我可以让订单服务写一条「订单 #12345 已创建」。库存服务读到它，去扣库存。通知服务也读得到这条，去发通知。今天通知服务停了半小时，只要消息还在，它回来以后就能接着读。库存服务可以照常做自己的事。</p>
+        <p>假如我写了一个下单接口，代码先存订单，再叫库存服务扣库存，最后等通知服务发完消息才返回。通知发得慢，页面就一直转圈。后来产品经理说还要做销量统计，我又得给下单接口接一个统计服务。</p>
+        <p>加上 Kafka，我可以让订单程序写一条「订单 #12345 已创建」。库存程序自己来读，通知程序也读同一条。加一个统计程序，它也能来读。哪天通知程序停了半小时，库存可以照常扣，通知回来以后再追自己的进度，只要消息还在。</p>
         <figure class="post-diagram">
           <a class="post-diagram-link" href="../assets/diagrams/kafka-learning/order-flow.svg" target="_blank" rel="noopener noreferrer"><img src="../assets/diagrams/kafka-learning/order-flow.svg" width="440" height="234" loading="lazy" decoding="async" alt="订单服务写一次，库存和通知两个服务都可以读到这条订单事件。"></a>
           <figcaption><span>订单写进 Kafka 后，两个服务可以各自读取。</span><span>点击配图可放大查看</span></figcaption>
         </figure>
-        <p>这里有个我一开始容易想漏的地方。<strong>页面上说什么，取决于后台已经做完了什么。</strong> 如果后台只是把订单收下了，页面可以显示「订单已受理」。要显示「库存已预留」，就得等系统真的把那双鞋留出来。</p>
+        <p>我当时把 Kafka 理解成一个中间层，让接口早点给用户回一句，后台还有记录可以接着做。这里得看接口答应了用户什么。系统收下了订单，可以说「订单已受理」。如果要说「库存已预留」，就得等那双鞋真的留出来。</p>
       </section>
 
       <section class="post-section" aria-labelledby="reading-positions">
-        <h2 id="reading-positions"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>一份流水，每组有自己的书签</span></h2>
-        <p>我当时问，数据库和 Kafka 不都在存东西吗？拿这笔订单来说，我在数据库里查到的是「#12345 现在已支付」。Kafka 的订单流水里，可以先有一条「#12345 已创建」，后面再有一条「#12345 已支付」。当然，得有人把这两条消息写进去，而且它们还在保留期限内。 <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 设计文档</a></p>
-        <p>那怎么知道一条消息读过了没有？我起初想在消息旁边写个「已处理」。可要是库存已经扣了，通知还没发，这三个字算谁的？</p>
-        <p>后来我把它想成一条流水和两张书签。流水上的每条消息有自己的位置编号，叫 <strong>offset</strong>。库存和通知各存各的书签。库存组存下 101，就表示下次从位置 101 接着读。通知组还停在 100，它回来时就从 100 接上。库存读过一遍，通知仍然能读到那条消息。 <a href="https://kafka.apache.org/44/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer API</a></p>
+        <h2 id="reading-positions"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>Kafka 到底把什么存下来了？</span></h2>
+        <p>我当时有两个问题。记录放在哪？读记录的人怎么知道自己该从哪条开始？</p>
+        <p>拿这笔订单来说，我从订单数据库里可以查到「#12345 现在已支付」。如果应用发布了订单事件，Kafka 里可以有两行流水，「#12345 已创建」和「#12345 已支付」。前者方便我看订单现在怎么样，后者方便别的程序知道刚发生了什么。要是业务没把某件事发出来，Kafka 的流水里就没有这一条。</p>
+        <p>在常见的本地磁盘存储里，Kafka 把每个分区的流水写成一段段文件，新记录往尾部追加。每段还有索引，客户端给出位置后，Broker 可以据此找到文件里的相关地方。普通保留策略可以按时间或大小清理旧的日志段。库存读完一条，通知照样能来读，因为消息什么时候清理有自己的规则。 <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 存储与保留设计</a> · <a href="https://kafka.apache.org/40/configuration/topic-level-configs/">Topic 配置</a></p>
+        <p>那读到哪了呢？我的第一反应是在消息上盖个「已处理」的章。可库存扣过了、通知还没发，这个章应当算谁的？</p>
+        <p>Kafka 给分区里每条消息一个位置编号，叫 <strong>offset</strong>。库存组和通知组各留一张书签。库存存下 101，下次从 101 接上。通知还停在 100，恢复以后可以从 100 开始。这两张书签指向的是同一份流水。 <a href="https://kafka.apache.org/44/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer API</a></p>
         <figure class="post-diagram">
           <a class="post-diagram-link" href="../assets/diagrams/kafka-learning/reading-positions.svg" target="_blank" rel="noopener noreferrer"><img src="../assets/diagrams/kafka-learning/reading-positions.svg" width="440" height="184" loading="lazy" decoding="async" alt="同一份订单流水上，通知组下次从位置 100 读，库存组下次从 101 读。"></a>
           <figcaption><span>两组读同一条流水，各自保存下次从哪里读。</span><span>点击配图可放大查看</span></figcaption>
         </figure>
+        <p>这就是我后来记住的两件事。<strong>offset 是消息在一条流水上的位置，提交的 offset 是某个组下次从哪个位置接着读。</strong> 一个组可以读好几条流水，每条都得有自己的书签。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="payment-crash">
+        <h2 id="payment-crash"><img class="post-section-mark" src="../assets/waymarks/trail-flag.svg" width="48" height="52" alt="" aria-hidden="true"><span>看得到历史，为什么还是可能重复扣费？</span></h2>
+        <p>我当时卡住的地方是，Kafka 明明留着「订单已创建」这条历史呀。程序恢复以后再看一遍，怎么还会重复扣费？</p>
+        <p>因为「有一笔订单」和「银行已经扣了这笔钱」是两件事。Kafka 能把下单消息再给我一遍。扣没扣钱，得看银行那边实际发生了什么。假如流程有两个动作，「发起扣款」和「在本地记已付款」，把它们换个顺序就能看到问题。</p>
+        <table class="post-table">
+          <thead><tr><th scope="col">挂掉之前做了什么</th><th scope="col">重启时可能看到什么</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">银行扣完款，本地还没记成功</th><td>本地看起来没付，再扣一次就可能重复</td></tr>
+            <tr><th scope="row">本地先记成已付款，还没向银行发请求</th><td>本地看起来已付，钱其实没扣</td></tr>
+            <tr><th scope="row">本地只记待确认，同时保存这笔付款的编号</th><td>重启后有编号可查，知道哪一笔还要确认</td></tr>
+          </tbody>
+        </table>
+        <p>所以我们聊到了「待确认」这个状态。先保存付款编号，向支付渠道发请求，拿到结果后再把本地状态改成成功或失败。如果发出扣款请求后只得到一个超时，就用原来的编号查结果。渠道支持幂等请求时，也可以带着原来的幂等标识重试。把付款编号换掉，渠道就可能当成又来了一笔。</p>
+        <p>这也回答了我最开始那个问题。<strong>重播消息可以把工作找回来。要知道工作已经做到哪一步，还得有这个业务自己的记录。</strong></p>
       </section>
 
       <section class="post-section" aria-labelledby="topics-and-partitions">
-        <h2 id="topics-and-partitions"><img class="post-section-mark" src="../assets/waymarks/trail-flag.svg" width="48" height="52" alt="" aria-hidden="true"><span>为什么要把一个 Topic 切成几个 Partition？</span></h2>
-        <p>订单越来越多时，一条流水可以拆成几条，各自往后写，也能由不同的程序同时读。整类订单消息有个共同的名字，比如 <code>order-events</code>，这个名字就是 <strong>Topic</strong>。下面拆出来的每条小流水叫 <strong>Partition（分区）</strong>，各有各的编号。</p>
-        <p>我当时追问过，直接用 <code>orders-0</code>、<code>orders-1</code> 两个 Topic 来分工，行不行？也能设计出一套这样的系统。只是写业务代码时，库存服务想订阅的就是「订单事件」。如果分成几个 Topic，还得有一套约定，告诉大家哪几个 Topic 是一组，新加一个之后怎么写、怎么读。Kafka 把这两件事分别做了。<strong>业务只用认一个 Topic 名字，Kafka 可以在它下面分开存、分开读。</strong> <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 设计文档</a></p>
-        <p>下一个问题是，轮到订单 #12345 的时候，到底写进哪一条流水？可以把订单号当成 <strong>Key</strong>，交给默认的有 Key 分区规则来选。只要分区数量和规则保持稳定，这笔订单的「创建」和「支付」会落在同一个分区。别的订单也可能挤进这一条。</p>
+        <h2 id="topics-and-partitions"><img class="post-section-mark" src="../assets/waymarks/footsteps.svg" width="48" height="52" alt="" aria-hidden="true"><span>如果从头设计，为什么不用多个 Topic 当分片？</span></h2>
+        <p>聊到订单多起来时，我们想让几个人同时处理。Kafka 的做法是，一个 <strong>Topic</strong> 给这批相关消息取个名字，例如 <code>order-events</code>。里面再切出几条各自存、各自往后写的流水，每条叫一个 <strong>Partition（分区）</strong>。</p>
+        <p>我当时问的其实是，假如我从头写一个系统，为什么不能让 <code>orders-0</code> 和 <code>orders-1</code> 都叫 Topic，然后在上面做调度？如果只说「Kafka 里 Topic 本来就是由 Partition 组成的」，等于把结论当成原因。</p>
+        <p>这样设计当然可以。试着写出库存程序的订阅就能看到差别。如果业务想表达「我关心所有订单」，用多个 Topic 做分片时，某处总得记住 <code>orders-0</code>、<code>orders-1</code> 属于同一条业务流。新增 <code>orders-2</code> 时，它也得自动被算进来。还得有地方规定每笔订单往哪写、几个库存程序怎么分。<strong>只要把这些规则补上，系统里就已经出现了两种东西，整类订单消息，以及用来分工的几条流水。</strong> Kafka 把它们干脆叫出了名字。聊天到这里，我才知道为什么两个概念都有用。 <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 设计文档</a></p>
+        <p>我接着问，每条流水里的记录凭什么放到一起？可以让订单号做消息的 <strong>Key</strong>。在 Kafka Java Producer 的默认有 Key 分区规则下，分区数和路由规则保持稳定，同一订单号会被算到同一个分区。不同订单号也可能算到一起。</p>
         <table class="post-table">
-          <thead><tr><th scope="col">同属 <code>order-events</code></th><th scope="col">按该分区里的写入顺序排列</th></tr></thead>
+          <thead><tr><th scope="col">同一个 Topic</th><th scope="col">分区里的实际写入顺序</th></tr></thead>
           <tbody>
             <tr><th scope="row">分区 0</th><td>#12345 创建 → #12347 创建 → #12345 支付</td></tr>
             <tr><th scope="row">分区 1</th><td>#12346 创建 → #12346 支付</td></tr>
           </tbody>
         </table>
-        <p>看分区 0，我能说 #12345 的「创建」写在「支付」前面。要判断分区 0 的第一条和分区 1 的第一条谁先写进去，光看两边的位置编号就不够了。<strong>Kafka 的顺序是一条流水内部的顺序。</strong> <a href="https://kafka.apache.org/41/configuration/producer-configs/">Apache Kafka Producer 配置</a></p>
+        <p>分区 0 里的 #12345 创建事件在支付事件前面，这是这条流水自己的顺序。分区 1 有自己的位置编号，光对着两边的编号看，排不出所有订单的总顺序。另一个容易漏的点是，加分区也不会把旧消息搬到新分区。按 Key 算分区时，同一个订单后续的消息可能改走另一条，所以扩分区还要考虑原先依赖的顺序。 <a href="https://kafka.apache.org/41/configuration/producer-configs/">Producer 配置</a> · <a href="https://kafka.apache.org/43/operations/basic-kafka-operations/">Topic 扩分区说明</a></p>
       </section>
 
       <section class="post-section" aria-labelledby="consumer-groups">
-        <h2 id="consumer-groups"><img class="post-section-mark" src="../assets/waymarks/footsteps.svg" width="48" height="52" alt="" aria-hidden="true"><span>开了三个库存程序，谁读哪一条？</span></h2>
-        <p>假设库存服务有三个能干同样工作的程序 A、B、C，我先开 A 和 B。我可以手动规定 A 读分区 0，B 读分区 1。可要是 A 突然挂了，谁来接手？A 回来以后，怎么避免两个人都以为分区 0 归自己？</p>
-        <p>把这三个程序放进同一个 <strong>Consumer Group（消费组）</strong>，Kafka 就能帮它们分工。在常用的消费组模式下，一个分区同一时刻最多交给组内一个成员。一个成员可以同时接好几个分区。</p>
+        <h2 id="consumer-groups"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>为什么还需要 Consumer Group？</span></h2>
+        <p>知道了分区，我还是觉得「消费组」有点悬。没有它也能读，对吧？假设我有两个库存程序 A 和 B，我可以写死 A 读分区 0、B 读分区 1。机器一直在线时，这样也能跑。等 A 挂了，我就得自己让 B 接手、记住 A 读到哪里，还要考虑 A 回来时怎么把分区还给它。</p>
+        <p>同一个 <strong>Consumer Group（消费组）</strong> 里的程序可以分着读。在常用的消费组模式下，一个分区同一时刻最多交给组内一个成员，一个成员可以负责多个分区。库存开三个实例和库存、通知各开一个程序，表达的是两件不一样的事。</p>
         <table class="post-table">
-          <thead><tr><th scope="col">库存组的情况</th><th scope="col">分区 0</th><th scope="col">分区 1</th></tr></thead>
+          <thead><tr><th scope="col">我想做什么</th><th scope="col">我会怎么分组</th></tr></thead>
           <tbody>
-            <tr><th scope="row">A、B 在跑</th><td>A 读</td><td>B 读</td></tr>
-            <tr><th scope="row">A 挂了</th><td>B 接手</td><td>B 继续读</td></tr>
-            <tr><th scope="row">A、B、C 都在跑</th><td>一种分法是 A 读</td><td>B 读，C 等着</td></tr>
+            <tr><th scope="row">三个库存实例一起干活</th><td>放在同一个库存组，平分能分的分区</td></tr>
+            <tr><th scope="row">库存和通知都要看到每笔订单</th><td>用两个组，各自把相关分区读一遍</td></tr>
+            <tr><th scope="row">同一个库存组开了三个实例，但只有两个分区</th><td>两个实例读，一个等着</td></tr>
+            <tr><th scope="row">库存和通知误填了同一个组名</th><td>Kafka 只会在它们之间分分区，各自能看到的订单可能不全</td></tr>
           </tbody>
         </table>
-        <p>程序加入或离开时重新分工，这就是 <strong>Rebalance（再均衡）</strong>。B 接手时，可以沿用库存组给分区 0 留下的书签。旧式的交接方式会让整组一起停下来重新分，新一些的方式可以让手头工作没变的成员继续读。</p>
-        <p>通知服务有自己的组。<strong>同一组是在分一份工作，不同的组可以各做各的工作。</strong> 库存和通知如果用同一个组，Kafka 会把分区分给它们，通知就可能读不到本该通知的订单。 <a href="https://kafka.apache.org/44/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer API</a> · <a href="https://kafka.apache.org/40/operations/consumer-rebalance-protocol/">消费组再均衡协议</a></p>
+        <p>我原先把这个关系想成「一边有好几条流水，一边有好几个读者，最后多对多」。这个直觉挺有用，只要在中间加一个条件。<strong>不同组都能去读同一个分区。到了同一个组里，分区交给谁，谁负责这条流水。</strong> Kafka 分的是分区。每条订单消息写进哪个分区，发送时就已经决定了。 <a href="https://kafka.apache.org/44/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer API</a></p>
+      </section>
+
+      <section class="post-section" aria-labelledby="rebalance">
+        <h2 id="rebalance"><img class="post-section-mark" src="../assets/waymarks/summit.svg" width="48" height="52" alt="" aria-hidden="true"><span>分区交给我了，为什么不能先做完手里的事？</span></h2>
+        <p>当时听到「组里来了一个新人，所有人先停下」时，我就觉得奇怪。要是 Kafka 告诉 A，「分区 1 也归你了」，A 等手头这条消息处理完再去看分区 1，不就行了吗？</p>
+        <p>要看 A 是多拿到一个分区，还是得把自己手里的分区交出去。消费者本来就自己拉取消息。拿到新分区之后，应用可以安排什么时候处理。麻烦的是旧分区交接。比如 A 手里还有分区 0 的一条订单没处理完，B 已经要来接这个分区。A 有哪些进度来得及存下？B 该从哪个位置恢复？这需要有一套交接规则。</p>
+        <table class="post-table">
+          <thead><tr><th scope="col">发生什么</th><th scope="col">接下来怎么办</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">A 挂了，分区 0 交给 B</th><td>B 从库存组上次提交的位置接着读</td></tr>
+            <tr><th scope="row">C 加入，只接走原来属于 B 的一个分区</th><td>新的增量方式可以只交接有变化的分区，其他分区继续读</td></tr>
+            <tr><th scope="row">A 处理完这条订单，来不及存书签就挂了</th><td>B 可能又读到这条，业务得能认出来</td></tr>
+          </tbody>
+        </table>
+        <p>这种重新分工叫 <strong>Rebalance（再均衡）</strong>。旧式的全量交接会让整组一起停下来协调。增量方式能缩小这次交接影响的范围。交接能把分区交给下一个人，仍然会遇到「上个人有没有把最后这条做完」的问题。 <a href="https://kafka.apache.org/40/operations/consumer-rebalance-protocol/">Apache Kafka 消费组再均衡协议</a></p>
       </section>
 
       <section class="post-section" aria-labelledby="crash-between-steps">
-        <h2 id="crash-between-steps"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>Kafka 里只有一条消息，库存却可能扣两次</span></h2>
-        <p>这是我觉得最容易想通、也最容易写错的地方。假设鞋还有 10 双，库存程序读到位置 100 的下单消息。它得做两件事，去数据库扣一双鞋，再把书签挪到 101。现在假设程序偏偏在两件事之间挂了。</p>
+        <h2 id="crash-between-steps"><img class="post-section-mark" src="../assets/waymarks/signpost.svg" width="48" height="52" alt="" aria-hidden="true"><span>书签上写 999，重启究竟从哪里接？</span></h2>
+        <p>聊到这里，我对一个数字问了很久。平常说「我读到 999」，可能是 999 已经读完，也可能是 999 翻开了还没看。Kafka 保存的是<strong>下次从哪里读</strong>。如果提交的是 999，下次从 999 读，有记录的话就先拿到 999。如果我说的是「999 已处理完」，正常提交的应该是 1000。把这两种说法混在一起，整个崩溃例子就会算反。</p>
+        <p>拿库存里的鞋再算一遍。鞋有 10 双，位置 100 上是一笔需要扣一双的订单。程序要做两个动作，扣库存和提交 101。它偏偏在这两步之间挂了。</p>
         <figure class="post-diagram">
           <a class="post-diagram-link" href="../assets/diagrams/kafka-learning/crash-between-steps.svg" target="_blank" rel="noopener noreferrer"><img src="../assets/diagrams/kafka-learning/crash-between-steps.svg" width="440" height="237" loading="lazy" decoding="async" alt="先扣库存再崩溃，重启会重读位置 100，直接再扣会剩 8 双。先存进度再崩溃，重启会从 101 读，漏扣后仍剩 10 双。"></a>
           <figcaption><span>重启后会不会重读，取决于崩溃前保存了哪个位置。</span><span>点击配图可放大查看</span></figcaption>
         </figure>
-        <p>图里两种结果都来自同一条消息。<strong>书签只告诉我接下来从哪儿读。库存到底扣过没有，得问库存自己的数据库。</strong></p>
-        <p>我可以给每次下单事件一个固定编号，比如 <code>evt-501</code>。库存程序把「扣一双」和「记下已处理 <code>evt-501</code>」放进同一个数据库事务，让这两件事一起成功或一起撤销。用唯一约束保证同一个编号只记一次。这样就算书签还来不及挪，重读时也能查到已经扣过。开发里常说的<strong>幂等</strong>，放在这里就是重来一遍，库存仍然只扣一次。 <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 消息投递语义</a></p>
-        <p>我最初问的是更麻烦的情况，银行已经扣钱，支付服务还没写下结果就挂了。银行和我的数据库各管各的。这时要看支付渠道能不能用同一个请求编号重试，或者能不能查到这笔钱已经扣过。Kafka 能把消息再交给我看一遍，实际扣款结果要跟支付渠道确认。</p>
-      </section>
-
-      <section class="post-section" aria-labelledby="sending-and-outbox">
-        <h2 id="sending-and-outbox"><img class="post-section-mark" src="../assets/waymarks/summit.svg" width="48" height="52" alt="" aria-hidden="true"><span>订单存好了，消息还没发出去怎么办？</span></h2>
-        <p>我把刚才的问题往前挪了一步。订单已经存进数据库，可订单程序刚存完就挂了，没来得及告诉 Kafka。库存服务在 Kafka 里等不到这条消息，它甚至不知道有过这笔订单。</p>
-        <p>一个办法是在存订单时，顺手往同一个数据库的「待发送」表里也存一行。这两笔一起存成功，或者一起撤销。后台程序再照着这张表发消息。这个做法叫 <strong>Outbox（事务发件箱）</strong>。</p>
+        <p>这也是自动提交和自己提交值得分开理解的地方。假如我的程序拿到一批消息就交给后台线程处理，Kafka 客户端记下的读取位置可能在业务完成之前往前走。我可以等一批消息真的处理完，才提交下一个位置。如果一批里中间还有一条没做完，也不能把书签跨过去。</p>
         <table class="post-table">
-          <thead><tr><th scope="col">谁来做</th><th scope="col">做什么</th></tr></thead>
+          <thead><tr><th scope="col">保存进度的时机</th><th scope="col">崩溃后的取舍</th></tr></thead>
           <tbody>
-            <tr><th scope="row">订单程序</th><td>一起存下订单和待发消息 <code>evt-501</code></td></tr>
-            <tr><th scope="row">后台发送程序</th><td>取出 <code>evt-501</code>，发给 Kafka，收到确认后标记为已发送</td></tr>
-            <tr><th scope="row">库存程序</th><td>读到 <code>evt-501</code>，根据这个编号判断是否已经扣过</td></tr>
+            <tr><th scope="row">先记下进度，再处理（至多一次）</th><td>可能跳过还没处理的消息</td></tr>
+            <tr><th scope="row">先处理，再记下进度（至少一次）</th><td>可能重读已经处理的消息</td></tr>
+            <tr><th scope="row">让处理结果看起来只做成一次</th><td>需要把进度和处理结果一起管理，或者让重复处理得到同样的结果</td></tr>
           </tbody>
         </table>
-        <p>如果后台发出消息之后、标记已发送之前挂了，它回来后可能再发一次。所以发件箱和上一节正好能接起来。<strong>发件箱让服务重启后还有东西可发，固定的消息编号让库存知道两次读到的是同一件事。</strong> <a href="https://debezium.io/documentation/reference/transformations/outbox-event-router.html">Debezium Outbox 文档</a></p>
-        <p>这里还有一种容易混到一起的重试。负责发消息的客户端叫 <strong>Producer（生产者）</strong>。它通常会把几条消息攒成一批再发，并根据 <code>acks</code> 设置等 Kafka 的写入确认。如果 Kafka 已经写下消息，只是回信丢了，开启生产者幂等后，客户端重试<strong>同一次发送</strong>时可以避免在 Kafka 里多写一条。应用代码另外调用了一次 <code>send()</code>，Kafka 会把它当成一次新发送。如果两次都写进去了，库存程序还是得靠 <code>evt-501</code> 认出来。 <a href="https://kafka.apache.org/41/configuration/producer-configs/">Apache Kafka Producer 配置</a></p>
+        <p>最后一行里的「只做成一次」也有范围。如果我从 Kafka 读、处理以后再写回 Kafka，可以用 Kafka 的事务机制把输出消息和消费进度一起提交，让下游只读已提交的输出。要是我还得去银行扣钱，银行的结果还是要靠银行确认。 <a href="https://kafka.apache.org/44/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer API</a> · <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 消息投递语义</a></p>
+        <p>我当时接着问，既然书签只能定位，该由谁给「这个事件已经扣过库存」做记号？而且扣库存和做记号是不是也得一起做？库存和这个记号如果都在同一个数据库里，我可以在一个事务中扣一双鞋、写下 <code>evt-501</code> 已处理，给事件编号加上唯一约束。这两步一起成功或一起撤销。下次重读 <code>evt-501</code>，库存程序就知道已经扣过了。这就是消费端的<strong>幂等</strong>在这个例子里的样子。</p>
       </section>
 
       <section class="post-section" aria-labelledby="brokers-and-replicas">
-        <h2 id="brokers-and-replicas"><img class="post-section-mark" src="../assets/waymarks/signpost.svg" width="48" height="52" alt="" aria-hidden="true"><span>如果是 Kafka 自己挂了呢？</span></h2>
-        <p>前面挂掉的是库存程序或订单程序。Kafka 自己也跑在机器上，每个负责存和提供消息的 Kafka 服务进程叫 <strong>Broker</strong>。一条流水可以存在两个 Broker 上，一份管写入，一份跟着复制。管写入的叫 <strong>Leader</strong>，跟着复制的叫 <strong>Follower</strong>。</p>
+        <h2 id="brokers-and-replicas"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>同一个 Topic，为什么能放在几台机器上？</span></h2>
+        <p>前面说的是库存程序挂了。Kafka 自己也靠服务器运行，每个负责存和提供消息的 Kafka 进程叫 <strong>Broker</strong>。一个 Topic 下面的各个分区可以放在不同的 Broker 上。同一个分区还可以有几份副本。</p>
+        <p>每个分区有一份负责接收写入的副本，叫 <strong>Leader</strong>。其他副本叫 <strong>Follower</strong>，会从 Leader 复制数据。我当时追问，那是不是每台 Broker 最后都摆满了所有分区的副本？</p>
         <table class="post-table">
-          <thead><tr><th scope="col">同一个 Topic</th><th scope="col">负责写入</th><th scope="col">跟着复制</th></tr></thead>
+          <thead><tr><th scope="col">副本因子设成 2</th><th scope="col">Leader</th><th scope="col">Follower</th></tr></thead>
           <tbody>
             <tr><th scope="row">分区 0</th><td>Broker 1</td><td>Broker 2</td></tr>
             <tr><th scope="row">分区 1</th><td>Broker 2</td><td>Broker 3</td></tr>
           </tbody>
         </table>
-        <p>我当时问，三个 Broker 会不会各自存着所有的分区？看这张表就知道了。Broker 1 只有分区 0，Broker 3 只有分区 1。这里每条流水有两份，这个数叫<strong>副本因子</strong>。</p>
-        <p>如果 Broker 2 挂了，分区 0 少了一份备份，分区 1 则失去了负责写入的 Leader。如果 Broker 3 的副本跟得够及时、符合选举条件，它就能接手。前面是库存组在换读消息的人，这里是 Kafka 在换负责接收写入的副本。 <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 复制设计</a></p>
+        <p>这张表里，Broker 1 只有分区 0，Broker 3 只有分区 1。每个分区有两份，每台机器存了哪些要看副本怎么分配。如果这里每个分区设成三份，刚好只有三台 Broker，这三个 Broker 才会各有一份。</p>
+        <p>Broker 2 挂掉时，分区 0 只是少了一份副本，分区 1 则要重新选负责写入的人。如果 Broker 3 上的分区 1 已经跟上，符合正常选举条件，它就能接手。Kafka 把跟得上的那批副本叫 <strong>ISR（同步副本集合）</strong>。没有符合条件的副本时，正常选举只能先等，不能保证立刻恢复写入。这里在换的是一条流水由哪台 Kafka 机器收消息。前面库存组在换的是由哪个库存程序读这条流水。 <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 复制设计</a></p>
+      </section>
+
+      <section class="post-section" aria-labelledby="producer-acks">
+        <h2 id="producer-acks"><img class="post-section-mark" src="../assets/waymarks/trail-flag.svg" width="48" height="52" alt="" aria-hidden="true"><span>我调用了 send，Kafka 就收到消息了吗？</span></h2>
+        <p>我聊完消费和副本以后，才回头看发消息这一边。订单代码里调用 <code>send()</code>，真正发消息的是 <strong>Producer（生产者）</strong> 客户端。以 Java 客户端为例，消息进缓冲区，客户端按分区攒批，再发给负责的 Broker。忙的时候，攒批能少跑很多趟。空闲时要不要多等一小会儿攒几条，可以看 <code>linger.ms</code>。带 Key 的消息按规则挑分区。不带 Key 时，默认会倾向连续用同一个分区把当前批攒起来，之后再换。</p>
+        <p>我下一步要问的是，程序什么时候能对自己说「这条写进去了」？这要看 <code>acks</code>。</p>
+        <table class="post-table">
+          <thead><tr><th scope="col">配置</th><th scope="col">生产者等哪种回信</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>acks=0</code></th><td>发出去就继续，生产者不等 Broker 的回信</td></tr>
+            <tr><th scope="row"><code>acks=1</code></th><td>等 Leader 确认写入，Follower 可能还没跟上</td></tr>
+            <tr><th scope="row"><code>acks=all</code></th><td>等当时跟得上的同步副本确认，<code>min.insync.replicas</code> 还可以规定至少要有几份</td></tr>
+          </tbody>
+        </table>
+        <p>举个例子，分区原来配了三份，眼下只有两份保持同步。如果 <code>min.insync.replicas</code> 设成 2，这两份确认就够。如果只剩一份同步，写入就会失败。这个回信告诉订单程序 Kafka 这一边写得怎么样，库存那头可能还没来读。 <a href="https://kafka.apache.org/41/configuration/producer-configs/">Apache Kafka Producer 配置</a> · <a href="https://kafka.apache.org/40/configuration/topic-level-configs/">Topic 配置</a></p>
+      </section>
+
+      <section class="post-section" aria-labelledby="producer-retry">
+        <h2 id="producer-retry"><img class="post-section-mark" src="../assets/waymarks/footsteps.svg" width="48" height="52" alt="" aria-hidden="true"><span>回信丢了，重试到底会不会发出第二条？</span></h2>
+        <p>这段讨论里我后来特意分清了两种「再试一下」。假设 Broker 已经把订单写进流水，只是回信没传回来。Producer 不知道第一趟已经到达，于是从内部重试同一次发送。开启<strong>生产者幂等</strong>时，Kafka 能用 Producer 身份和序号认出来，防止这次重试多写一条。关了幂等、又允许多个批次同时在路上时，前一批失败重试、后一批先到，还可能改变写入顺序。</p>
+        <p>另一种情况是，我的应用捕获错误后主动再调用一次 <code>send()</code>，哪怕订单号和内容都一样，也可以是一次全新的发送。订单 #12345 原本就可能有「创建」「支付」两条消息，所以用订单号做 Key，也不能拿它判断是不是同一次事件。</p>
+        <table class="post-table">
+          <thead><tr><th scope="col">我看到的现象</th><th scope="col">该用什么识别</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Producer 在内部重试同一次发送</th><td>生产者幂等用客户端身份和序号识别</td></tr>
+            <tr><th scope="row">程序自己又调用了一次 <code>send()</code></th><td>同一业务事件要沿用同一个 <code>eventId</code></td></tr>
+            <tr><th scope="row">Kafka 里只有一条记录，库存组把它读了第二遍</th><td>库存按 <code>eventId</code> 确认这次有没有扣过</td></tr>
+          </tbody>
+        </table>
+        <p>对照着看，之前说过的「库存扣两遍」和这里的「Kafka 里写了两条」就接起来了。两种情况在流水里留下的东西不一样，库存都需要认得自己已经做过的事。 <a href="https://kafka.apache.org/41/configuration/producer-configs/">Apache Kafka Producer 配置</a></p>
+      </section>
+
+      <section class="post-section" aria-labelledby="sending-and-outbox">
+        <h2 id="sending-and-outbox"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>如果程序刚存完订单，连 send 都没来得及调用？</span></h2>
+        <p>这题是从上一题顺出来的。Producer 可以重试已经交给它的消息。如果程序刚写完订单数据库就崩溃，Producer 还没见过这条订单消息。用户下了单，库存却可能一直等不到。</p>
+        <p>我们聊到的办法叫 <strong>Transactional Outbox（事务发件箱）</strong>。还是用同一个数据库，保存订单时，顺手在「待发消息」表里放一行。订单和待发消息一起成功或撤销。以后由后台程序去发，应用一重启也还有地方找回这份没做完的工作。</p>
+        <table class="post-table">
+          <thead><tr><th scope="col">角色</th><th scope="col">动作</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">订单程序</th><td>一起存订单和待发事件 <code>evt-501</code></td></tr>
+            <tr><th scope="row">后台发送程序</th><td>读待发事件，发给 Kafka，确认后再标记已发送</td></tr>
+            <tr><th scope="row">库存程序</th><td>读到 <code>evt-501</code>，查自己有没有扣过这双鞋</td></tr>
+          </tbody>
+        </table>
+        <p>如果第二步发成功之后、还没标记就崩溃，发送程序可以再次读到这一行并重发，所以还得保留原来的编号。发件箱保住的是「有一条消息待发」这件事。发给 Kafka 之后，重复的可能性还要继续处理。 <a href="https://debezium.io/documentation/reference/transformations/outbox-event-router.html">Debezium Outbox 文档</a></p>
       </section>
 
       <section class="post-section" aria-labelledby="running-kafka">
-        <h2 id="running-kafka"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>真要用起来，我得启动什么？</span></h2>
-        <p>现在再回到最开始那个问题。自己在电脑上学时，我可以跑一个 Kafka 容器，用客户端连到 <code>localhost:9092</code>。创建 <code>order-events</code> 之后，我就能开一个终端写一行消息，再开一个终端读。换成真实项目，写的那头是订单代码，读的那头是库存代码。Kafka 是中间那个一直在跑、负责把消息存下来的程序。 <a href="https://kafka.apache.org/quickstart/">Apache Kafka Quickstart</a></p>
-        <p>我看旧的 Docker Compose 示例时，还指着 <code>zookeeper</code> 问，它也要单独跑吗？<strong>那份旧配置里，确实要跑两个服务。</strong> ZooKeeper 帮旧版 Kafka 管一些集群信息。比如哪个节点在线、由谁负责管理集群。Apache Kafka 从 4.0 开始用自己的 KRaft 模式管理这些信息。我在本地学习时，可以让一个 Kafka 进程既存消息，也负责管理。 <a href="https://kafka.apache.org/40/getting-started/upgrade/">Kafka 4.0 升级说明</a> · <a href="https://kafka.apache.org/40/getting-started/zk2kraft/">KRaft 与 ZooKeeper</a></p>
-        <p>我接下来最想自己跑一遍的是那个书签实验。开库存和通知两个组，让它们各自读一条、存下进度。关掉通知组，再往 Kafka 里发几条。看着库存一直往前走，等通知组回来，再看看它是不是从上次停下的地方接上。</p>
+        <h2 id="running-kafka"><img class="post-section-mark" src="../assets/waymarks/summit.svg" width="48" height="52" alt="" aria-hidden="true"><span>真要用起来，我得启动什么？</span></h2>
+        <p>讲完一圈，我才问了那个最朴素的问题。Python 是写代码的语言，MySQL 是需要先启动、应用再连过去的服务。Kafka 属于后面这种。我可以用发行包启动一个 Kafka 进程，也可以在本机跑一个 Kafka 容器。订单程序、库存程序都有自己的进程，用各自代码里的客户端库连 Kafka。比如连本机的 <code>localhost:9092</code>。创建 Topic、手动发一条和读一条、查某个组到哪了，都有命令行工具，也能用 Kafka 的图形化管理工具查看。 <a href="https://kafka.apache.org/quickstart/">Apache Kafka Quickstart</a> · <a href="https://kafka.apache.org/43/operations/basic-kafka-operations/">Kafka 管理命令</a></p>
+        <p>旧版 Docker Compose 还有个 <code>zookeeper</code>，我当时就问它是不是单独跑。那类配置里确实有两个服务。ZooKeeper 帮旧版 Kafka 管理一些集群信息，例如哪些 Broker 在线、谁负责管理集群。消费组是在 Kafka 里分工和保存进度的。Apache Kafka 4.0 起使用 <strong>KRaft</strong>，由 Kafka 自己的 Controller 管集群信息。自己在电脑上学的时候，一个 Kafka 进程可以既充当 Broker，又兼任 Controller。 <a href="https://kafka.apache.org/40/getting-started/upgrade/">Kafka 4.0 升级说明</a> · <a href="https://kafka.apache.org/40/getting-started/zk2kraft/">KRaft 与 ZooKeeper</a></p>
+        <p>回过头看，我终于能把一笔订单说完整了。订单程序把「下了一单」写进一条流水。Kafka 把流水存下来，几台 Broker 可以分着放，每个分区还能留副本。库存和通知各自来读，谁停了就用自己的书签找回来。真正扣库存、发通知、确认钱扣了没有，还是各自的程序在干。</p>
+        <p>接下来我想自己跑一次。先发一条订单事件，让库存组和通知组都读到。停掉通知组，继续发几条，再把通知组开回来。如果它从自己停下的位置接上，我就能亲眼看到，两组读的是同一本账，各自夹着自己的书签。</p>
       </section>
         </div>
         <figure class="post-illustration" data-post-image-slot hidden></figure>
@@ -163,12 +242,16 @@
           <h2 id="post-toc-title">这一页的目录</h2>
           <nav aria-labelledby="post-toc-title"><ol>
 <li><a href="#why-kafka">下单成功，为什么还得等通知发完？</a></li>
-<li><a href="#reading-positions">一份流水，每组有自己的书签</a></li>
-<li><a href="#topics-and-partitions">为什么要把一个 Topic 切成几个 Partition？</a></li>
-<li><a href="#consumer-groups">开了三个库存程序，谁读哪一条？</a></li>
-<li><a href="#crash-between-steps">Kafka 里只有一条消息，库存却可能扣两次</a></li>
-<li><a href="#sending-and-outbox">订单存好了，消息还没发出去怎么办？</a></li>
-<li><a href="#brokers-and-replicas">如果是 Kafka 自己挂了呢？</a></li>
+<li><a href="#reading-positions">Kafka 到底把什么存下来了？</a></li>
+<li><a href="#payment-crash">看得到历史，为什么还是可能重复扣费？</a></li>
+<li><a href="#topics-and-partitions">如果从头设计，为什么不用多个 Topic 当分片？</a></li>
+<li><a href="#consumer-groups">为什么还需要 Consumer Group？</a></li>
+<li><a href="#rebalance">分区交给我了，为什么不能先做完手里的事？</a></li>
+<li><a href="#crash-between-steps">书签上写 999，重启究竟从哪里接？</a></li>
+<li><a href="#brokers-and-replicas">同一个 Topic，为什么能放在几台机器上？</a></li>
+<li><a href="#producer-acks">我调用了 send，Kafka 就收到消息了吗？</a></li>
+<li><a href="#producer-retry">回信丢了，重试到底会不会发出第二条？</a></li>
+<li><a href="#sending-and-outbox">如果程序刚存完订单，连 send 都没来得及调用？</a></li>
 <li><a href="#running-kafka">真要用起来，我得启动什么？</a></li>
           </ol></nav>
         </div>
