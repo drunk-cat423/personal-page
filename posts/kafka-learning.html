@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <link rel="icon" type="image/svg+xml" href="../assets/branding/tree.svg?v=20261010-lyw-station">
+  <meta charset="utf-8">
+  <script src="../theme.js?v=20261029-theme-nav"></script>
+  <script src="../page-transitions.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fdfefe">
+  <meta name="description" content="跟着一笔买鞋订单，弄清 Kafka 怎么存消息、消费组怎么分工，以及为什么程序重启后可能重复扣库存。">
+  <title>我顺着一笔订单，弄懂了 Kafka 在做什么 · LYW Station</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
+  <link rel="stylesheet" href="../article.css?v=20261123-article-tables">
+  <script type="module" src="../site.js?v=20261123-kafka-learning" async></script>
+  <link rel="stylesheet" href="../theme.css?v=20261029-dark-names">
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+  <div class="site-shell">
+    <header class="site-header" id="top">
+      <a class="brand" href="../index.html" aria-label="回到主页"><span class="home-label">主页</span><svg class="home-ink" viewBox="0 0 60 12" aria-hidden="true" focusable="false"><path d="M3 5C17 3 38 7 56 4" /><path class="home-ink-echo" d="M9 9C25 7 40 10 51 8" /></svg></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav"><span class="nav-toggle-label">打开菜单</span><span aria-hidden="true">☰</span></button>
+      <nav class="main-nav" id="site-nav" aria-label="主要导航"><a href="../articles.html" aria-current="page">文章</a><a href="../works.html">作品</a><a href="../guestbook.html">留言</a><a href="../about.html">关于</a></nav>
+    </header>
+    <main id="main-content" class="post-page">
+      <article class="post-article">
+        <a class="post-back" href="../articles.html">← 返回文章列表</a>
+        <header class="post-header">
+          <h1 class="post-title">我顺着一笔订单，弄懂了 Kafka 在做什么</h1>
+          <p class="post-excerpt">跟着一笔买鞋订单，弄清 Kafka 怎么存消息、消费组怎么分工，以及为什么程序重启后可能重复扣库存。</p>
+          <div class="post-meta"><span class="post-category">技术</span><time datetime="2026-11-23">2026.11.23</time><span>约 16 分钟</span></div>
+        </header>
+        <details class="post-toc post-toc--mobile">
+          <summary>这一页的目录</summary>
+          <nav aria-label="文章目录"><ol>
+<li><a href="#why-kafka">下单成功，为什么还得等通知发完？</a></li>
+<li><a href="#reading-positions">一份流水，每组有自己的书签</a></li>
+<li><a href="#topics-and-partitions">为什么要把一个 Topic 切成几个 Partition？</a></li>
+<li><a href="#consumer-groups">开了三个库存程序，谁读哪一条？</a></li>
+<li><a href="#crash-between-steps">Kafka 里只有一条消息，库存却可能扣两次</a></li>
+<li><a href="#sending-and-outbox">订单存好了，消息还没发出去怎么办？</a></li>
+<li><a href="#brokers-and-replicas">如果是 Kafka 自己挂了呢？</a></li>
+<li><a href="#running-kafka">真要用起来，我得启动什么？</a></li>
+          </ol></nav>
+        </details>
+        <div class="post-content">
+        <p>开始学以前，我只听说过 Kafka 这个名字。聊到后来，我还问了一个很实在的问题。「我写代码的时候，到底怎么用它？」就像用 MySQL，要先有个数据库服务在跑，我的程序才有地方连。<strong>Kafka 也是一个跑着等程序来连的服务。我的程序可以往里写消息，也可以从里面读消息。</strong></p>
+        <p>要弄懂什么时候会用它，我还是得回到《Kafka 101》里的订单例子。假如有人买了一双鞋，库存要少一双，通知要发一条。要做的事就这么几件，Kafka 来了以后，究竟帮了什么忙？ <a href="https://kafkaisfun.dev/learn/kafka-101">《Kafka 101》</a></p>
+      <section class="post-section" aria-labelledby="why-kafka">
+        <h2 id="why-kafka"><img class="post-section-mark" src="../assets/waymarks/signpost.svg" width="48" height="52" alt="" aria-hidden="true"><span>下单成功，为什么还得等通知发完？</span></h2>
+        <p>假如我写了一个下单接口，代码里先存订单，再叫库存服务扣库存，最后等通知服务发完消息才返回。通知服务要是卡住，用户虽然已经下了单，页面上还在转圈。</p>
+        <p>加上 Kafka，我可以让订单服务写一条「订单 #12345 已创建」。库存服务读到它，去扣库存。通知服务也读得到这条，去发通知。今天通知服务停了半小时，只要消息还在，它回来以后就能接着读。库存服务可以照常做自己的事。</p>
+        <figure class="post-diagram">
+          <a class="post-diagram-link" href="../assets/diagrams/kafka-learning/order-flow.svg" target="_blank" rel="noopener noreferrer"><img src="../assets/diagrams/kafka-learning/order-flow.svg" width="440" height="234" loading="lazy" decoding="async" alt="订单服务写一次，库存和通知两个服务都可以读到这条订单事件。"></a>
+          <figcaption><span>订单写进 Kafka 后，两个服务可以各自读取。</span><span>点击配图可放大查看</span></figcaption>
+        </figure>
+        <p>这里有个我一开始容易想漏的地方。<strong>页面上说什么，取决于后台已经做完了什么。</strong> 如果后台只是把订单收下了，页面可以显示「订单已受理」。要显示「库存已预留」，就得等系统真的把那双鞋留出来。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="reading-positions">
+        <h2 id="reading-positions"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>一份流水，每组有自己的书签</span></h2>
+        <p>我当时问，数据库和 Kafka 不都在存东西吗？拿这笔订单来说，我在数据库里查到的是「#12345 现在已支付」。Kafka 的订单流水里，可以先有一条「#12345 已创建」，后面再有一条「#12345 已支付」。当然，得有人把这两条消息写进去，而且它们还在保留期限内。 <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 设计文档</a></p>
+        <p>那怎么知道一条消息读过了没有？我起初想在消息旁边写个「已处理」。可要是库存已经扣了，通知还没发，这三个字算谁的？</p>
+        <p>后来我把它想成一条流水和两张书签。流水上的每条消息有自己的位置编号，叫 <strong>offset</strong>。库存和通知各存各的书签。库存组存下 101，就表示下次从位置 101 接着读。通知组还停在 100，它回来时就从 100 接上。库存读过一遍，通知仍然能读到那条消息。 <a href="https://kafka.apache.org/44/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer API</a></p>
+        <figure class="post-diagram">
+          <a class="post-diagram-link" href="../assets/diagrams/kafka-learning/reading-positions.svg" target="_blank" rel="noopener noreferrer"><img src="../assets/diagrams/kafka-learning/reading-positions.svg" width="440" height="184" loading="lazy" decoding="async" alt="同一份订单流水上，通知组下次从位置 100 读，库存组下次从 101 读。"></a>
+          <figcaption><span>两组读同一条流水，各自保存下次从哪里读。</span><span>点击配图可放大查看</span></figcaption>
+        </figure>
+      </section>
+
+      <section class="post-section" aria-labelledby="topics-and-partitions">
+        <h2 id="topics-and-partitions"><img class="post-section-mark" src="../assets/waymarks/trail-flag.svg" width="48" height="52" alt="" aria-hidden="true"><span>为什么要把一个 Topic 切成几个 Partition？</span></h2>
+        <p>订单越来越多时，一条流水可以拆成几条，各自往后写，也能由不同的程序同时读。整类订单消息有个共同的名字，比如 <code>order-events</code>，这个名字就是 <strong>Topic</strong>。下面拆出来的每条小流水叫 <strong>Partition（分区）</strong>，各有各的编号。</p>
+        <p>我当时追问过，直接用 <code>orders-0</code>、<code>orders-1</code> 两个 Topic 来分工，行不行？也能设计出一套这样的系统。只是写业务代码时，库存服务想订阅的就是「订单事件」。如果分成几个 Topic，还得有一套约定，告诉大家哪几个 Topic 是一组，新加一个之后怎么写、怎么读。Kafka 把这两件事分别做了。<strong>业务只用认一个 Topic 名字，Kafka 可以在它下面分开存、分开读。</strong> <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 设计文档</a></p>
+        <p>下一个问题是，轮到订单 #12345 的时候，到底写进哪一条流水？可以把订单号当成 <strong>Key</strong>，交给默认的有 Key 分区规则来选。只要分区数量和规则保持稳定，这笔订单的「创建」和「支付」会落在同一个分区。别的订单也可能挤进这一条。</p>
+        <table class="post-table">
+          <thead><tr><th scope="col">同属 <code>order-events</code></th><th scope="col">按该分区里的写入顺序排列</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">分区 0</th><td>#12345 创建 → #12347 创建 → #12345 支付</td></tr>
+            <tr><th scope="row">分区 1</th><td>#12346 创建 → #12346 支付</td></tr>
+          </tbody>
+        </table>
+        <p>看分区 0，我能说 #12345 的「创建」写在「支付」前面。要判断分区 0 的第一条和分区 1 的第一条谁先写进去，光看两边的位置编号就不够了。<strong>Kafka 的顺序是一条流水内部的顺序。</strong> <a href="https://kafka.apache.org/41/configuration/producer-configs/">Apache Kafka Producer 配置</a></p>
+      </section>
+
+      <section class="post-section" aria-labelledby="consumer-groups">
+        <h2 id="consumer-groups"><img class="post-section-mark" src="../assets/waymarks/footsteps.svg" width="48" height="52" alt="" aria-hidden="true"><span>开了三个库存程序，谁读哪一条？</span></h2>
+        <p>假设库存服务有三个能干同样工作的程序 A、B、C，我先开 A 和 B。我可以手动规定 A 读分区 0，B 读分区 1。可要是 A 突然挂了，谁来接手？A 回来以后，怎么避免两个人都以为分区 0 归自己？</p>
+        <p>把这三个程序放进同一个 <strong>Consumer Group（消费组）</strong>，Kafka 就能帮它们分工。在常用的消费组模式下，一个分区同一时刻最多交给组内一个成员。一个成员可以同时接好几个分区。</p>
+        <table class="post-table">
+          <thead><tr><th scope="col">库存组的情况</th><th scope="col">分区 0</th><th scope="col">分区 1</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">A、B 在跑</th><td>A 读</td><td>B 读</td></tr>
+            <tr><th scope="row">A 挂了</th><td>B 接手</td><td>B 继续读</td></tr>
+            <tr><th scope="row">A、B、C 都在跑</th><td>一种分法是 A 读</td><td>B 读，C 等着</td></tr>
+          </tbody>
+        </table>
+        <p>程序加入或离开时重新分工，这就是 <strong>Rebalance（再均衡）</strong>。B 接手时，可以沿用库存组给分区 0 留下的书签。旧式的交接方式会让整组一起停下来重新分，新一些的方式可以让手头工作没变的成员继续读。</p>
+        <p>通知服务有自己的组。<strong>同一组是在分一份工作，不同的组可以各做各的工作。</strong> 库存和通知如果用同一个组，Kafka 会把分区分给它们，通知就可能读不到本该通知的订单。 <a href="https://kafka.apache.org/44/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">KafkaConsumer API</a> · <a href="https://kafka.apache.org/40/operations/consumer-rebalance-protocol/">消费组再均衡协议</a></p>
+      </section>
+
+      <section class="post-section" aria-labelledby="crash-between-steps">
+        <h2 id="crash-between-steps"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>Kafka 里只有一条消息，库存却可能扣两次</span></h2>
+        <p>这是我觉得最容易想通、也最容易写错的地方。假设鞋还有 10 双，库存程序读到位置 100 的下单消息。它得做两件事，去数据库扣一双鞋，再把书签挪到 101。现在假设程序偏偏在两件事之间挂了。</p>
+        <figure class="post-diagram">
+          <a class="post-diagram-link" href="../assets/diagrams/kafka-learning/crash-between-steps.svg" target="_blank" rel="noopener noreferrer"><img src="../assets/diagrams/kafka-learning/crash-between-steps.svg" width="440" height="237" loading="lazy" decoding="async" alt="先扣库存再崩溃，重启会重读位置 100，直接再扣会剩 8 双。先存进度再崩溃，重启会从 101 读，漏扣后仍剩 10 双。"></a>
+          <figcaption><span>重启后会不会重读，取决于崩溃前保存了哪个位置。</span><span>点击配图可放大查看</span></figcaption>
+        </figure>
+        <p>图里两种结果都来自同一条消息。<strong>书签只告诉我接下来从哪儿读。库存到底扣过没有，得问库存自己的数据库。</strong></p>
+        <p>我可以给每次下单事件一个固定编号，比如 <code>evt-501</code>。库存程序把「扣一双」和「记下已处理 <code>evt-501</code>」放进同一个数据库事务，让这两件事一起成功或一起撤销。用唯一约束保证同一个编号只记一次。这样就算书签还来不及挪，重读时也能查到已经扣过。开发里常说的<strong>幂等</strong>，放在这里就是重来一遍，库存仍然只扣一次。 <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 消息投递语义</a></p>
+        <p>我最初问的是更麻烦的情况，银行已经扣钱，支付服务还没写下结果就挂了。银行和我的数据库各管各的。这时要看支付渠道能不能用同一个请求编号重试，或者能不能查到这笔钱已经扣过。Kafka 能把消息再交给我看一遍，实际扣款结果要跟支付渠道确认。</p>
+      </section>
+
+      <section class="post-section" aria-labelledby="sending-and-outbox">
+        <h2 id="sending-and-outbox"><img class="post-section-mark" src="../assets/waymarks/summit.svg" width="48" height="52" alt="" aria-hidden="true"><span>订单存好了，消息还没发出去怎么办？</span></h2>
+        <p>我把刚才的问题往前挪了一步。订单已经存进数据库，可订单程序刚存完就挂了，没来得及告诉 Kafka。库存服务在 Kafka 里等不到这条消息，它甚至不知道有过这笔订单。</p>
+        <p>一个办法是在存订单时，顺手往同一个数据库的「待发送」表里也存一行。这两笔一起存成功，或者一起撤销。后台程序再照着这张表发消息。这个做法叫 <strong>Outbox（事务发件箱）</strong>。</p>
+        <table class="post-table">
+          <thead><tr><th scope="col">谁来做</th><th scope="col">做什么</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">订单程序</th><td>一起存下订单和待发消息 <code>evt-501</code></td></tr>
+            <tr><th scope="row">后台发送程序</th><td>取出 <code>evt-501</code>，发给 Kafka，收到确认后标记为已发送</td></tr>
+            <tr><th scope="row">库存程序</th><td>读到 <code>evt-501</code>，根据这个编号判断是否已经扣过</td></tr>
+          </tbody>
+        </table>
+        <p>如果后台发出消息之后、标记已发送之前挂了，它回来后可能再发一次。所以发件箱和上一节正好能接起来。<strong>发件箱让服务重启后还有东西可发，固定的消息编号让库存知道两次读到的是同一件事。</strong> <a href="https://debezium.io/documentation/reference/transformations/outbox-event-router.html">Debezium Outbox 文档</a></p>
+        <p>这里还有一种容易混到一起的重试。负责发消息的客户端叫 <strong>Producer（生产者）</strong>。它通常会把几条消息攒成一批再发，并根据 <code>acks</code> 设置等 Kafka 的写入确认。如果 Kafka 已经写下消息，只是回信丢了，开启生产者幂等后，客户端重试<strong>同一次发送</strong>时可以避免在 Kafka 里多写一条。应用代码另外调用了一次 <code>send()</code>，Kafka 会把它当成一次新发送。如果两次都写进去了，库存程序还是得靠 <code>evt-501</code> 认出来。 <a href="https://kafka.apache.org/41/configuration/producer-configs/">Apache Kafka Producer 配置</a></p>
+      </section>
+
+      <section class="post-section" aria-labelledby="brokers-and-replicas">
+        <h2 id="brokers-and-replicas"><img class="post-section-mark" src="../assets/waymarks/signpost.svg" width="48" height="52" alt="" aria-hidden="true"><span>如果是 Kafka 自己挂了呢？</span></h2>
+        <p>前面挂掉的是库存程序或订单程序。Kafka 自己也跑在机器上，每个负责存和提供消息的 Kafka 服务进程叫 <strong>Broker</strong>。一条流水可以存在两个 Broker 上，一份管写入，一份跟着复制。管写入的叫 <strong>Leader</strong>，跟着复制的叫 <strong>Follower</strong>。</p>
+        <table class="post-table">
+          <thead><tr><th scope="col">同一个 Topic</th><th scope="col">负责写入</th><th scope="col">跟着复制</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">分区 0</th><td>Broker 1</td><td>Broker 2</td></tr>
+            <tr><th scope="row">分区 1</th><td>Broker 2</td><td>Broker 3</td></tr>
+          </tbody>
+        </table>
+        <p>我当时问，三个 Broker 会不会各自存着所有的分区？看这张表就知道了。Broker 1 只有分区 0，Broker 3 只有分区 1。这里每条流水有两份，这个数叫<strong>副本因子</strong>。</p>
+        <p>如果 Broker 2 挂了，分区 0 少了一份备份，分区 1 则失去了负责写入的 Leader。如果 Broker 3 的副本跟得够及时、符合选举条件，它就能接手。前面是库存组在换读消息的人，这里是 Kafka 在换负责接收写入的副本。 <a href="https://kafka.apache.org/41/design/design/">Apache Kafka 复制设计</a></p>
+      </section>
+
+      <section class="post-section" aria-labelledby="running-kafka">
+        <h2 id="running-kafka"><img class="post-section-mark" src="../assets/waymarks/cairn.svg" width="48" height="52" alt="" aria-hidden="true"><span>真要用起来，我得启动什么？</span></h2>
+        <p>现在再回到最开始那个问题。自己在电脑上学时，我可以跑一个 Kafka 容器，用客户端连到 <code>localhost:9092</code>。创建 <code>order-events</code> 之后，我就能开一个终端写一行消息，再开一个终端读。换成真实项目，写的那头是订单代码，读的那头是库存代码。Kafka 是中间那个一直在跑、负责把消息存下来的程序。 <a href="https://kafka.apache.org/quickstart/">Apache Kafka Quickstart</a></p>
+        <p>我看旧的 Docker Compose 示例时，还指着 <code>zookeeper</code> 问，它也要单独跑吗？<strong>那份旧配置里，确实要跑两个服务。</strong> ZooKeeper 帮旧版 Kafka 管一些集群信息。比如哪个节点在线、由谁负责管理集群。Apache Kafka 从 4.0 开始用自己的 KRaft 模式管理这些信息。我在本地学习时，可以让一个 Kafka 进程既存消息，也负责管理。 <a href="https://kafka.apache.org/40/getting-started/upgrade/">Kafka 4.0 升级说明</a> · <a href="https://kafka.apache.org/40/getting-started/zk2kraft/">KRaft 与 ZooKeeper</a></p>
+        <p>我接下来最想自己跑一遍的是那个书签实验。开库存和通知两个组，让它们各自读一条、存下进度。关掉通知组，再往 Kafka 里发几条。看着库存一直往前走，等通知组回来，再看看它是不是从上次停下的地方接上。</p>
+      </section>
+        </div>
+        <figure class="post-illustration" data-post-image-slot hidden></figure>
+        <nav class="post-pagination" aria-label="前后文章">
+          <div class="post-neighbor post-neighbor--prev post-neighbor--empty"><span>上一篇</span><strong>暂无上一篇</strong></div>
+          <a class="post-list-link" href="../articles.html"><svg class="post-list-arrow" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M7 5 3 9l4 4M3.5 9H12c4.5 0 5 3.5 3 6" /></svg><span class="post-list-label">返回文章列表<svg class="post-list-ink" viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M3 5C30 3 68 7 116 4" /><path class="post-list-echo" d="M12 9C43 7 77 10 106 8" /></svg></span></a>
+          <a class="post-neighbor post-neighbor--next" href="super-agent-reading.html" rel="next"><span>下一篇</span><strong>读完 Super-agent，我开始重新思考 bot 的交互方式</strong></a>
+        </nav>
+      </article>
+      <aside class="post-sidebar post-toc--desktop" aria-labelledby="post-toc-title">
+        <div class="post-sidebar-inner">
+          <h2 id="post-toc-title">这一页的目录</h2>
+          <nav aria-labelledby="post-toc-title"><ol>
+<li><a href="#why-kafka">下单成功，为什么还得等通知发完？</a></li>
+<li><a href="#reading-positions">一份流水，每组有自己的书签</a></li>
+<li><a href="#topics-and-partitions">为什么要把一个 Topic 切成几个 Partition？</a></li>
+<li><a href="#consumer-groups">开了三个库存程序，谁读哪一条？</a></li>
+<li><a href="#crash-between-steps">Kafka 里只有一条消息，库存却可能扣两次</a></li>
+<li><a href="#sending-and-outbox">订单存好了，消息还没发出去怎么办？</a></li>
+<li><a href="#brokers-and-replicas">如果是 Kafka 自己挂了呢？</a></li>
+<li><a href="#running-kafka">真要用起来，我得启动什么？</a></li>
+          </ol></nav>
+        </div>
+      </aside>
+    </main>
+    <footer class="site-footer"><a class="footer-brand" href="../index.html">LYW Station</a><a class="site-filing" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026096103号-1</a><nav class="footer-social" aria-label="社交链接"><a class="footer-social-link" href="https://github.com/drunk-cat423" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 18.5c-3.7 1.1-3.7-1.8-5.2-2.2m10.4 4v-2.8c0-.8.1-1.4-.4-1.9 3.2-.4 6.5-1.6 6.5-7.2a5.6 5.6 0 0 0-1.5-3.9 5.2 5.2 0 0 0-.1-3.9s-1.2-.4-4 1.5a13.8 13.8 0 0 0-7.3 0C3.6.2 2.4.6 2.4.6a5.2 5.2 0 0 0-.1 3.9A5.6 5.6 0 0 0 .8 8.4c0 5.6 3.3 6.8 6.5 7.2-.4.4-.5 1-.4 1.9v2.8"/></svg><span>GitHub</span></a><button class="footer-social-link footer-social-link--disabled" type="button" disabled aria-label="RSS 稍后开放" title="RSS 稍后开放"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="5" cy="19" r="1.2"/><path d="M4 11a9 9 0 0 1 9 9M4 5a15 15 0 0 1 15 15"/></svg><span>RSS</span></button></nav><div class="post-reading-tools">
+      <div class="reading-progress" data-reading-progress role="progressbar" aria-label="文章阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
+        <svg viewBox="0 0 46 46" aria-hidden="true" focusable="false"><circle class="reading-progress-track" cx="23" cy="23" r="20"/><circle class="reading-progress-arc" cx="23" cy="23" r="20" pathLength="100"/></svg>
+        <span data-reading-percent>0%</span>
+      </div>
+      <a class="footer-back-top" href="#top">回到顶部 ↑</a>
+    </div></footer>
+  </div>
+</body>
+</html>

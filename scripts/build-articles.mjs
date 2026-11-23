@@ -93,7 +93,7 @@ function validateArticles(items) {
         const figure = section.figure;
         if (!figure || !Number.isInteger(figure.afterParagraph)
           || figure.afterParagraph < 0 || figure.afterParagraph >= section.paragraphs.length
-          || typeof figure.src !== 'string' || !/^\.\.\/assets\/diagrams\/super-agent\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:svg|png|jpg)$/.test(figure.src)
+          || typeof figure.src !== 'string' || !/^\.\.\/assets\/diagrams\/[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*\.(?:svg|png|jpg)$/.test(figure.src)
           || typeof figure.alt !== 'string' || !figure.alt.trim()
           || typeof figure.caption !== 'string' || !figure.caption.trim()
           || !Number.isInteger(figure.width) || figure.width <= 0
@@ -103,6 +103,15 @@ function validateArticles(items) {
             || !isHttpsSourceURL(figure.source.url)))
           || !existsSync(path.resolve(postsDir, figure.src))) {
           throw new Error(`Section figure is invalid in ${article.id}#${section.id}`);
+        }
+      }
+      if (section.table !== undefined) {
+        const { afterParagraph, headers, rows } = section.table ?? {};
+        if (!Number.isInteger(afterParagraph) || afterParagraph < 0 || afterParagraph >= section.paragraphs.length
+          || !Array.isArray(headers) || headers.length < 2 || headers.some((header) => typeof header !== 'string' || !header.trim())
+          || !Array.isArray(rows) || !rows.length || rows.some((row) => !Array.isArray(row)
+            || row.length !== headers.length || row.some((cell) => typeof cell !== 'string'))) {
+          throw new Error(`Section table is invalid in ${article.id}#${section.id}`);
         }
       }
       if (section.demo !== undefined && (!section.demo || section.demo.id !== 'motion-vocabulary'
@@ -122,17 +131,34 @@ function estimateReadMinutes(article) {
   return Math.max(1, Math.ceil(characterCount / 300));
 }
 
-function renderParagraph(paragraph) {
-  const codeBlock = /^```(?:text)?\n([\s\S]*?)\n```$/.exec(paragraph);
-  if (codeBlock) return `<pre><code>${escapeHTML(codeBlock[1])}</code></pre>`;
-  const content = paragraph.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\))/g).map((part) => {
+function renderInline(text) {
+  return text.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\))/g).map((part) => {
     if (part.startsWith('`') && part.endsWith('`')) return `<code>${escapeHTML(part.slice(1, -1))}</code>`;
     if (part.startsWith('**') && part.endsWith('**')) return `<strong>${escapeHTML(part.slice(2, -2))}</strong>`;
     const link = /^\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)$/.exec(part);
     if (link) return `<a href="${escapeHTML(link[2])}">${escapeHTML(link[1])}</a>`;
     return escapeHTML(part);
   }).join('');
-  return `<p>${content}</p>`;
+}
+
+function renderParagraph(paragraph) {
+  const codeBlock = /^```(?:text)?\n([\s\S]*?)\n```$/.exec(paragraph);
+  if (codeBlock) return `<pre><code>${escapeHTML(codeBlock[1])}</code></pre>`;
+  return `<p>${renderInline(paragraph)}</p>`;
+}
+
+function renderTable({ headers, rows }) {
+  const head = headers.map((header) => `<th scope="col">${renderInline(header)}</th>`).join('');
+  const body = rows.map((row) => `<tr>${row.map((cell, index) => (
+    index === 0 ? `<th scope="row">${renderInline(cell)}</th>` : `<td>${renderInline(cell)}</td>`
+  )).join('')}</tr>`).join('\n            ');
+  return `
+        <table class="post-table">
+          <thead><tr>${head}</tr></thead>
+          <tbody>
+            ${body}
+          </tbody>
+        </table>`;
 }
 
 function renderSections(article) {
@@ -143,7 +169,7 @@ function renderSections(article) {
   const body = article.sections.map((section, sectionIndex) => `
       <section class="post-section" aria-labelledby="${escapeHTML(section.id)}">
         <h2 id="${escapeHTML(section.id)}"><img class="post-section-mark" src="../assets/waymarks/${waymarks[sectionIndex % waymarks.length]}.svg" width="48" height="52" alt="" aria-hidden="true"><span>${escapeHTML(section.title)}</span></h2>
-${section.paragraphs.map((paragraph, index) => `        ${renderParagraph(paragraph)}${section.animation?.afterParagraph === index ? renderAnimation(section.animation) : ''}${section.figure?.afterParagraph === index ? renderFigure(section.figure) : ''}${section.demo?.afterParagraph === index ? renderMotionDemo() : ''}`).join('\n')}
+${section.paragraphs.map((paragraph, index) => `        ${renderParagraph(paragraph)}${section.animation?.afterParagraph === index ? renderAnimation(section.animation) : ''}${section.figure?.afterParagraph === index ? renderFigure(section.figure) : ''}${section.table?.afterParagraph === index ? renderTable(section.table) : ''}${section.demo?.afterParagraph === index ? renderMotionDemo() : ''}`).join('\n')}
       </section>`).join('\n');
   return { toc, body };
 }
@@ -229,8 +255,8 @@ function renderArticle(article, index) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
-  <link rel="stylesheet" href="../article.css?v=20261102-static-diagrams">
-  <script type="module" src="../site.js?v=20261102-super-agent-comments" async></script>
+  <link rel="stylesheet" href="../article.css?v=20261123-article-tables">
+  <script type="module" src="../site.js?v=20261123-kafka-learning" async></script>
 ${animationScript}${demoAssets}  <link rel="stylesheet" href="../theme.css?v=20261029-dark-names">
 </head>
 <body data-page="post">

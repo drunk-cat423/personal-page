@@ -355,6 +355,32 @@ body[data-page='post'] .post-reading-tools .footer-back-top {
   outline-offset: 3px;
 }
 
+.post-table {
+  width: 100%;
+  margin: 0 0 1.25em;
+  border-collapse: collapse;
+  font: 400 .9em/1.65 var(--sans);
+  text-align: start;
+}
+
+.post-table th,
+.post-table td {
+  padding: .55em .65em;
+  border: 1px solid rgb(83 125 171 / 27%);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.post-table thead th {
+  color: var(--heading-ink);
+  background: rgb(83 125 171 / 10%);
+  font-weight: 650;
+}
+
+.post-table tbody th {
+  font-weight: 550;
+}
+
 .post-diagram {
   min-width: 0;
   margin: 0 0 1.25em;
@@ -362,7 +388,8 @@ body[data-page='post'] .post-reading-tools .footer-back-top {
 
 .post-diagram-link {
   display: block;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   border-radius: 6px;
 }
 
@@ -373,7 +400,7 @@ body[data-page='post'] .post-reading-tools .footer-back-top {
 
 .post-diagram img {
   display: block;
-  width: 100%;
+  width: auto;
   max-width: 100%;
   height: auto;
   border: 1px solid rgb(83 125 171 / 13%);

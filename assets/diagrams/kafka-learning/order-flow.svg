@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="234" viewBox="0 0 440 234" role="img" aria-labelledby="kafka-flow-title kafka-flow-desc">
+  <title id="kafka-flow-title">一条订单消息，两边都能读</title>
+  <desc id="kafka-flow-desc">订单服务把订单已创建写入 Kafka。库存服务和通知服务分别从 Kafka 读到这条订单事件。</desc>
+  <defs>
+    <marker id="kafka-flow-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M1 1L7 4L1 7" fill="none" stroke="#51637c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="438" height="232" rx="18" fill="#f8fafc" stroke="#dbe4ee"/>
+  <g font-family="system-ui, 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" fill="#182b44">
+    <rect x="142" y="14" width="156" height="40" rx="10" fill="#e8efff" stroke="#b9cdf4"/>
+    <text x="220" y="40" font-size="18" font-weight="700" text-anchor="middle">订单服务</text>
+    <path d="M220 55V89" fill="none" stroke="#51637c" stroke-width="1.6" marker-end="url(#kafka-flow-arrow)"/>
+    <text x="231" y="76" font-size="14" fill="#435574">写入</text>
+
+    <rect x="86" y="92" width="268" height="53" rx="12" fill="#fff" stroke="#a7b9d3"/>
+    <text x="220" y="114" font-size="17" font-weight="700" text-anchor="middle">Kafka</text>
+    <text x="220" y="134" font-size="15" text-anchor="middle">订单 #12345 已创建</text>
+
+    <path d="M220 145V157H119V177" fill="none" stroke="#51637c" stroke-width="1.6" marker-end="url(#kafka-flow-arrow)"/>
+    <path d="M220 157H321V177" fill="none" stroke="#51637c" stroke-width="1.6" marker-end="url(#kafka-flow-arrow)"/>
+    <text x="125" y="173" font-size="13" fill="#435574">读取</text>
+    <text x="327" y="173" font-size="13" fill="#435574">读取</text>
+
+    <rect x="48" y="181" width="142" height="38" rx="10" fill="#dcf5e9" stroke="#9acfba"/>
+    <rect x="250" y="181" width="142" height="38" rx="10" fill="#fff0da" stroke="#e7c894"/>
+    <text x="119" y="206" font-size="17" font-weight="700" text-anchor="middle">库存服务</text>
+    <text x="321" y="206" font-size="17" font-weight="700" text-anchor="middle">通知服务</text>
+  </g>
+</svg>

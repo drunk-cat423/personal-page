@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="237" viewBox="0 0 440 237" role="img" aria-labelledby="kafka-crash-title kafka-crash-desc">
+  <title id="kafka-crash-title">两步之间崩溃，库存会怎样</title>
+  <desc id="kafka-crash-desc">消费进度原来是 100，库存原来是 10 双。先扣库存再崩溃，重启会重读 100，如果直接再扣一双就只剩 8 双。先存进度再崩溃，重启从 101 读，跳过扣库存，仍剩 10 双。</desc>
+  <defs>
+    <marker id="kafka-crash-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M1 1L7 4L1 7" fill="none" stroke="#51637c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="438" height="235" rx="18" fill="#f8fafc" stroke="#dbe4ee"/>
+  <g font-family="system-ui, 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" fill="#182b44">
+    <text x="19" y="30" font-size="16" font-weight="700">起点 · 库存有 10 双，下次读位置 100</text>
+
+    <rect x="18" y="46" width="404" height="79" rx="11" fill="#fff" stroke="#d5dee9"/>
+    <rect x="29" y="58" width="145" height="25" rx="7" fill="#e8efff"/>
+    <text x="39" y="76" font-size="15" font-weight="700">先扣一双，剩 9 双</text>
+    <path d="M181 71H207" stroke="#51637c" stroke-width="1.5" marker-end="url(#kafka-crash-arrow)"/>
+    <rect x="218" y="58" width="68" height="25" rx="7" fill="#fce2e0"/>
+    <text x="252" y="76" font-size="15" font-weight="700" text-anchor="middle" fill="#952d30">崩溃</text>
+    <text x="31" y="108" font-size="15">重启读 100，直接再扣就只剩 <tspan font-weight="700" fill="#952d30">8 双</tspan></text>
+
+    <rect x="18" y="137" width="404" height="82" rx="11" fill="#fff" stroke="#d5dee9"/>
+    <rect x="29" y="149" width="145" height="25" rx="7" fill="#e8efff"/>
+    <text x="39" y="167" font-size="15" font-weight="700">先记下进度 101</text>
+    <path d="M181 162H207" stroke="#51637c" stroke-width="1.5" marker-end="url(#kafka-crash-arrow)"/>
+    <rect x="218" y="149" width="68" height="25" rx="7" fill="#fce2e0"/>
+    <text x="252" y="167" font-size="15" font-weight="700" text-anchor="middle" fill="#952d30">崩溃</text>
+    <text x="31" y="201" font-size="15">重启读 101，漏扣一双，仍剩 <tspan font-weight="700" fill="#952d30">10 双</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="184" viewBox="0 0 440 184" role="img" aria-labelledby="kafka-offset-title kafka-offset-desc">
+  <title id="kafka-offset-title">两组消费者，各自存一张书签</title>
+  <desc id="kafka-offset-desc">同一分区有位置 99、100 和 101。通知组保存 100，下次从位置 100 读。库存组保存 101，下次从位置 101 读。</desc>
+  <defs>
+    <marker id="kafka-offset-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M1 1L7 4L1 7" fill="none" stroke="#51637c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="438" height="182" rx="18" fill="#f8fafc" stroke="#dbe4ee"/>
+  <g font-family="system-ui, 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" fill="#182b44">
+    <text x="20" y="29" font-size="16" font-weight="700">订单流水 · 分区 0</text>
+    <g fill="#fff" stroke="#c4d2e4">
+      <rect x="20" y="47" width="112" height="54" rx="9"/>
+      <rect x="139" y="47" width="137" height="54" rx="9"/>
+      <rect x="283" y="47" width="137" height="54" rx="9"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="76" y="69" font-size="17" font-weight="700">99</text>
+      <text x="207.5" y="69" font-size="17" font-weight="700">100</text>
+      <text x="351.5" y="69" font-size="17" font-weight="700">101</text>
+      <text x="76" y="89" font-size="13">另一笔订单</text>
+      <text x="207.5" y="89" font-size="13">#12345 创建</text>
+      <text x="351.5" y="89" font-size="13">#12345 支付</text>
+    </g>
+    <path d="M207.5 130V105" fill="none" stroke="#51637c" stroke-width="1.5" marker-end="url(#kafka-offset-arrow)"/>
+    <path d="M351.5 130V105" fill="none" stroke="#51637c" stroke-width="1.5" marker-end="url(#kafka-offset-arrow)"/>
+    <rect x="139" y="133" width="137" height="34" rx="8" fill="#fff0da" stroke="#e7c894"/>
+    <rect x="283" y="133" width="137" height="34" rx="8" fill="#dcf5e9" stroke="#9acfba"/>
+    <text x="207.5" y="155" font-size="14" font-weight="700" text-anchor="middle">通知组下次从这读</text>
+    <text x="351.5" y="155" font-size="14" font-weight="700" text-anchor="middle">库存组下次从这读</text>
+  </g>
+</svg>
