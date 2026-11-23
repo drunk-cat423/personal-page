@@ -1,4 +1,4 @@
-import { articles, works, messages } from './content.js?v=20261123-kafka-learning';
+import { articles, works, messages } from './content.js?v=20261123-kafka-rewrite';
 import { setupPoseScene } from './scene-player.js?v=20261010-pose-player';
 import { createCommentAvatar } from './comment-avatars.js?v=20261010-avatar-icons';
 

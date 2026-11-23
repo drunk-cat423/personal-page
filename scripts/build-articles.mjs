@@ -144,6 +144,11 @@ function renderInline(text) {
 function renderParagraph(paragraph) {
   const codeBlock = /^```(?:text)?\n([\s\S]*?)\n```$/.exec(paragraph);
   if (codeBlock) return `<pre><code>${escapeHTML(codeBlock[1])}</code></pre>`;
+  const lines = paragraph.split('\n');
+  if (lines.every((line) => /^- \S/.test(line))) {
+    const items = lines.map((line) => `<li>${renderInline(line.slice(2))}</li>`).join('');
+    return `<ul>${items}</ul>`;
+  }
   return `<p>${renderInline(paragraph)}</p>`;
 }
 
@@ -164,11 +169,11 @@ function renderTable({ headers, rows }) {
 function renderSections(article) {
   const waymarks = ['signpost', 'cairn', 'trail-flag', 'footsteps', 'cairn', 'summit'];
   const toc = article.sections.map((section) => (
-    `<li><a href="#${escapeHTML(section.id)}">${escapeHTML(section.title)}</a></li>`
+    `<li><a href="#${escapeHTML(section.id)}">${escapeHTML(section.title.replace(/`([^`\n]+)`/g, '$1'))}</a></li>`
   )).join('\n');
   const body = article.sections.map((section, sectionIndex) => `
       <section class="post-section" aria-labelledby="${escapeHTML(section.id)}">
-        <h2 id="${escapeHTML(section.id)}"><img class="post-section-mark" src="../assets/waymarks/${waymarks[sectionIndex % waymarks.length]}.svg" width="48" height="52" alt="" aria-hidden="true"><span>${escapeHTML(section.title)}</span></h2>
+        <h2 id="${escapeHTML(section.id)}"><img class="post-section-mark" src="../assets/waymarks/${waymarks[sectionIndex % waymarks.length]}.svg" width="48" height="52" alt="" aria-hidden="true"><span>${renderInline(section.title)}</span></h2>
 ${section.paragraphs.map((paragraph, index) => `        ${renderParagraph(paragraph)}${section.animation?.afterParagraph === index ? renderAnimation(section.animation) : ''}${section.figure?.afterParagraph === index ? renderFigure(section.figure) : ''}${section.table?.afterParagraph === index ? renderTable(section.table) : ''}${section.demo?.afterParagraph === index ? renderMotionDemo() : ''}`).join('\n')}
       </section>`).join('\n');
   return { toc, body };
@@ -256,7 +261,7 @@ function renderArticle(article, index) {
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=DM+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="../site.css?v=20261010-avatar-icons">
   <link rel="stylesheet" href="../article.css?v=20261123-article-tables">
-  <script type="module" src="../site.js?v=20261123-kafka-learning" async></script>
+  <script type="module" src="../site.js?v=20261123-kafka-rewrite" async></script>
 ${animationScript}${demoAssets}  <link rel="stylesheet" href="../theme.css?v=20261029-dark-names">
 </head>
 <body data-page="post">
